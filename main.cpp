@@ -48,9 +48,11 @@ debouncedIgnitionReleasedStateMachine_t ignitionState;
 
 void inputsInit();
 void outputsInit();
+void displayInit();
 
 void debounceIgnitionInit();
 bool debounceIgnition();
+void userInterfaceDisplayInit();
 
 void ignitionSubsystem();
 
@@ -72,7 +74,6 @@ int main()
 }
 
 //=====[Implementations of public functions]===================================
-
 void inputsInit()
 {
     ignition.mode(PullDown);
@@ -197,7 +198,67 @@ void ignitionSubsystem()
         
     }
 }
+void displayInit()
+{
+    delay( 50 );
+    
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS );
+    delay( 5 );
+            
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS );
+    delay( 1 ); 
 
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS );
+    delay( 1 );  
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS | 
+                      DISPLAY_IR_FUNCTION_SET_2LINES |
+                      DISPLAY_IR_FUNCTION_SET_5x8DOTS );
+    delay( 1 );         
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_DISPLAY_CONTROL |
+                      DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_OFF |      
+                      DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |       
+                      DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF );       
+    delay( 1 );          
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_CLEAR_DISPLAY );       
+    delay( 1 ); 
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_ENTRY_MODE_SET |
+                      DISPLAY_IR_ENTRY_MODE_SET_INCREMENT |       
+                      DISPLAY_IR_ENTRY_MODE_SET_NO_SHIFT );                  
+    delay( 1 );           
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_DISPLAY_CONTROL |
+                      DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_ON |      
+                      DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |    
+                      DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF );    
+    delay( 1 );  
+}
+
+void userInterfaceDisplayInit()
+{
+    displayInit();
+     
+    displayCharPositionWrite ( 0,0 );
+    displayStringWrite( "Welcome" );
+    
+    displayCharPositionWrite ( 0,1 );
+    displayStringWrite( "To the car!" );
+}
 
 int headlightsSettings()
 {   

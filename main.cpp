@@ -3,47 +3,60 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//=====[Defines]===============================================================
+#define TIME_INCREMENT_MS 10
+#define TIME_DEBOUNCE_MS 30
+#define DELAY_LIGHTS_OFF_MS 2000
+#define DELAY_LIGHTS_ON_MS 1000
 
-#define NUMBER_OF_KEYS 4
+//=====[Declaration of public data types]======================================
+
+typedef enum{
+    BUTTON_UP,
+    BUTTON_FALLING,
+    BUTTON_DOWN,
+    BUTTON_RISING
+} debouncedIgnitionReleasedStateMachine_t;
 
 //=====[Declaration and initialization of public global objects]===============
 
-DigitalIn enterButton(BUTTON1);
-DigitalIn gasDetector(D2);
-DigitalIn overTempDetector(D3);
-DigitalIn aButton(D4);
-DigitalIn bButton(D5);
-DigitalIn cButton(D6);
-DigitalIn dButton(D7);
 
-DigitalOut alarmLed(LED1);
-DigitalOut incorrectCodeLed(LED3);
-DigitalOut systemBlockedLed(LED2);
+DigitalIn ignition(BUTTON1);
+DigitalIn driverSeatOccupancy(PD_7);
+
+DigitalOut blueLed(LED2);
+DigitalOut rightHeadlight(PE_10);
+DigitalOut leftHeadlight(PE_12);
 
 UnbufferedSerial uartUsb(USBTX, USBRX, 115200);
 
+AnalogIn potentiometer(A0);
+AnalogIn lightSensor(A1);
+
 //=====[Declaration and initialization of public global variables]=============
 
-bool alarmState    = OFF;
-bool incorrectCode = false;
+int accumulatedDebounceButtonTime = 0;
+int accumulatedHeadlightDelayTime_ON = 0;
+int accumulatedHeadlightDelayTime_OFF = 0;
 
-int numberOfIncorrectCodes = 0;
-int buttonBeingCompared    = 0;
-int codeSequence[NUMBER_OF_KEYS]   = { 1, 1, 0, 0 };
-int buttonsPressed[NUMBER_OF_KEYS] = { 0, 0, 0, 0 };
+
+bool engineStarted = OFF;
+
+debouncedIgnitionReleasedStateMachine_t ignitionState;
+//ignitionReleaseStateMachine_t ignitionState;
 
 //=====[Declarations (prototypes) of public functions]=========================
 
 void inputsInit();
 void outputsInit();
 
-void alarmActivationUpdate();
-void alarmDeactivationUpdate();
+void debounceIgnitionInit();
+bool debounceIgnition();
 
-void uartTask();
-void availableCommands();
-bool areEqual();
+void ignitionSubsystem();
+
+int headlightsSettings();
+void headlightsSubsystem();
+
 
 //=====[Main function, the program entry point after power on or reset]========
 
@@ -52,9 +65,9 @@ int main()
     inputsInit();
     outputsInit();
     while (true) {
-        alarmActivationUpdate();
-        alarmDeactivationUpdate();
-        uartTask();
+        ignitionSubsystem();
+        headlightsSubsystem();
+        delay(TIME_INCREMENT_MS);
     }
 }
 
@@ -62,183 +75,223 @@ int main()
 
 void inputsInit()
 {
-    gasDetector.mode(PullDown);
-    overTempDetector.mode(PullDown);
-    aButton.mode(PullDown);
-    bButton.mode(PullDown);
-    cButton.mode(PullDown);
-    dButton.mode(PullDown);
+    ignition.mode(PullDown);
+    driverSeatOccupancy.mode(PullDown);
 }
 
 void outputsInit()
 {
-    alarmLed = OFF;
-    incorrectCodeLed = OFF;
-    systemBlockedLed = OFF;
+    blueLed = OFF;
+    rightHeadlight = OFF;
+    leftHeadlight = OFF;
 }
 
-void alarmActivationUpdate()
+void debounceIgnitionInit()
 {
-    if ( gasDetector || overTempDetector ) {
-        alarmState = ON;
-    }
-    alarmLed = alarmState;
-}
-
-void alarmDeactivationUpdate()
-{
-    if ( numberOfIncorrectCodes < 5 ) {
-        if ( aButton && bButton && cButton && dButton && !enterButton ) {
-            incorrectCodeLed = OFF;
-        }
-        if ( enterButton && !incorrectCodeLed && alarmState ) {
-            buttonsPressed[0] = aButton;
-            buttonsPressed[1] = bButton;
-            buttonsPressed[2] = cButton;
-            buttonsPressed[3] = dButton;
-            if ( areEqual() ) {
-                alarmState = OFF;
-                numberOfIncorrectCodes = 0;
-            } else {
-                incorrectCodeLed = ON;
-                numberOfIncorrectCodes++;
-            }
-        }
+    if( ignition) {
+        ignitionState = BUTTON_UP;
     } else {
-        systemBlockedLed = ON;
+        ignitionState = BUTTON_DOWN;
     }
 }
 
-void uartTask()
+bool debounceIgnition()
 {
-    char receivedChar = '\0';
-    if( uartUsb.readable() ) {
-        uartUsb.read( &receivedChar, 1 );
-        switch (receivedChar) {
-        case '1':
-            if ( alarmState ) {
-                uartUsb.write( "The alarm is activated\r\n", 24);
-            } else {
-                uartUsb.write( "The alarm is not activated\r\n", 28);
-            }
-            break;
+    bool ignitionReleasedEvent = false;
 
-        case '2':
-            if ( gasDetector ) {
-                uartUsb.write( "Gas is being detected\r\n", 22);
-            } else {
-                uartUsb.write( "Gas is not being detected\r\n", 27);
-            }
-            break;
-
-        case '3':
-            if ( overTempDetector ) {
-                uartUsb.write( "Temperature is above the maximum level\r\n", 40);
-            } else {
-                uartUsb.write( "Temperature is below the maximum level\r\n", 40);
-            }
-            break;
+    // begin FSM where button presses register only on release, with a debouncing feature
+    switch( ignitionState ) {
+    
+    case BUTTON_UP:
+        // state should be changed if the button is pressed
+        if( ignition) {
+            ignitionState = BUTTON_FALLING;
+            //set debounce timer equal to zero
+            accumulatedDebounceButtonTime = 0;
             
-        case '4':
-            uartUsb.write( "Please enter the code sequence.\r\n", 33 );
-            uartUsb.write( "First enter 'A', then 'B', then 'C', and ", 41 ); 
-            uartUsb.write( "finally 'D' button\r\n", 20 );
-            uartUsb.write( "In each case type 1 for pressed or 0 for ", 41 );
-            uartUsb.write( "not pressed\r\n", 13 );
-            uartUsb.write( "For example, for 'A' = pressed, ", 32 );
-            uartUsb.write( "'B' = pressed, 'C' = not pressed, ", 34);
-            uartUsb.write( "'D' = not pressed, enter '1', then '1', ", 40 );
-            uartUsb.write( "then '0', and finally '0'\r\n\r\n", 29 );
+        }
+        break;
 
-            incorrectCode = false;
-
-            for ( buttonBeingCompared = 0; 
-                  buttonBeingCompared < NUMBER_OF_KEYS; 
-                  buttonBeingCompared++) {
-
-                uartUsb.read( &receivedChar, 1 );
-                uartUsb.write( "*", 1 );
-
-                if ( receivedChar == '1' ) {
-                    if ( codeSequence[buttonBeingCompared] != 1 ) {
-                        incorrectCode = true;
-                    }
-                } else if ( receivedChar == '0' ) {
-                    if ( codeSequence[buttonBeingCompared] != 0 ) {
-                        incorrectCode = true;
-                    }
-                } else {
-                    incorrectCode = true;
-                }
-            }
-
-            if ( incorrectCode == false ) {
-                uartUsb.write( "\r\nThe code is correct\r\n\r\n", 25 );
-                alarmState = OFF;
-                incorrectCodeLed = OFF;
-                numberOfIncorrectCodes = 0;
+    case BUTTON_FALLING:
+        // must check if an appropriate amount of time has passed by incrementing an int variable by 10 each loop (below), and comparing it to 40.
+        // as long as an appropriate time has passed and the button is still being pressed, the state should advance to BUTTON_DOWN. 
+        // otherwise it will go back to BUTTON_UP. This is to ensure that the signal is in a steady state and there is no bouncing.
+        if( accumulatedDebounceButtonTime >= TIME_DEBOUNCE_MS ) {
+            if( ignition ) {
+                ignitionState = BUTTON_DOWN;
             } else {
-                uartUsb.write( "\r\nThe code is incorrect\r\n\r\n", 27 );
-                incorrectCodeLed = ON;
-                numberOfIncorrectCodes++;
-            }                
-            break;
+                ignitionState = BUTTON_UP;
+            }
+        }
+        // increment debounce timer by 10 for each loop
+        accumulatedDebounceButtonTime = accumulatedDebounceButtonTime +
+                                        TIME_INCREMENT_MS;
+        break;
 
-        case '5':
-            uartUsb.write( "Please enter new code sequence\r\n", 32 );
-            uartUsb.write( "First enter 'A', then 'B', then 'C', and ", 41 );
-            uartUsb.write( "finally 'D' button\r\n", 20 );
-            uartUsb.write( "In each case type 1 for pressed or 0 for not ", 45 );
-            uartUsb.write( "pressed\r\n", 9 );
-            uartUsb.write( "For example, for 'A' = pressed, 'B' = pressed,", 46 );
-            uartUsb.write( " 'C' = not pressed,", 19 );
-            uartUsb.write( "'D' = not pressed, enter '1', then '1', ", 40 );
-            uartUsb.write( "then '0', and finally '0'\r\n\r\n", 29 );
+    case BUTTON_DOWN:
+        // FSM remains in this state until the button is released, then it advances to BUTTON_RISING
+        if(ignition == OFF) {
+            ignitionState = BUTTON_RISING;
+            //set debounce timer equal to zero
+            accumulatedDebounceButtonTime = 0;
+        }
+        break;
 
-            for ( buttonBeingCompared = 0; 
-                  buttonBeingCompared < NUMBER_OF_KEYS; 
-                  buttonBeingCompared++) {
+    case BUTTON_RISING:
+        // must check if an appropriate amount of time has passed by incrementing an int variable by 10 each loop (below), and comparing it to 40.
+        // as long as an appropriate time has passed and the button is still not being pressed, the state should advance to BUTTON_UP. 
+        // otherwise it will go back to BUTTON_DOWN. This is to ensure that the signal is in a steady state and there is no bouncing.
+        if( accumulatedDebounceButtonTime >= TIME_DEBOUNCE_MS ) {
+            if( ignition == OFF) {
+                ignitionState = BUTTON_UP;
+                // set this bool equal to 1, this is what will be returned, and will signify a button press.
+                // this is done in this state because we want the button press to register on release (BUTTON_DOWN to BUTTON_UP)
+                ignitionReleasedEvent = true;
+            } else {
+                ignitionState = BUTTON_DOWN;
+            }
+        }
+         // increment debounce timer by 10 for each loop
+        accumulatedDebounceButtonTime = accumulatedDebounceButtonTime +
+                                        TIME_INCREMENT_MS;
+        break;
 
-                uartUsb.read( &receivedChar, 1 );
-                uartUsb.write( "*", 1 );
+    default:
+        // reinitialize state machine
+        debounceIgnitionInit();
+        break;
+    }
+    // return bool true or false
+    return ignitionReleasedEvent;
+}
 
-                if ( receivedChar == '1' ) {
-                    codeSequence[buttonBeingCompared] = 1;
-                } else if ( receivedChar == '0' ) {
-                    codeSequence[buttonBeingCompared] = 0;
+
+void ignitionSubsystem()
+{
+    //button press only recognized on release
+    if (debounceIgnition())
+    {   
+        // ignition is pressed when engine is on
+        if (engineStarted)
+        {
+            engineStarted = OFF;
+            blueLed = OFF;
+            uartUsb.write("\r\nEngine turned off\r\n", 25);
+            
+        }
+        // driver must be sitting and engine cannot be on already
+        else if (driverSeatOccupancy && !engineStarted)
+        {
+            engineStarted = ON;
+            uartUsb.write("\r\nEngine started\r\n", 20);
+            blueLed = ON;
+            
+        }
+        // driver must not be sitting and engine cannot be on already
+        else if (!driverSeatOccupancy && !engineStarted)
+        {
+            uartUsb.write("\r\nError: Driver must be seated\r\n", 35);
+        }
+        
+        
+        
+    }
+}
+
+
+int headlightsSettings()
+{   
+    static int potentiometerState = 0;
+    // read values for potentiometer
+    float potentiometerReadingScaled = potentiometer.read();
+    
+    // analog values for potentiometer range from 0 to 1, because we are using it to specify 3 settings,
+    // each setting is represented by splitting the range into thirds.
+    if (potentiometerReadingScaled <= 0.33)
+    {
+        // Headlights OFF
+        potentiometerState = 1;
+    }
+    else if (potentiometerReadingScaled > 0.33 && potentiometerReadingScaled < 0.66)
+    {
+        //Headlights AUTO
+        potentiometerState = 2;
+    }
+    else if (potentiometerReadingScaled >= 0.66)
+    {
+        //Headlights ON
+        potentiometerState = 3;
+    }
+    return (potentiometerState);
+}
+
+
+
+void headlightsSubsystem()
+{
+    static float lightSenorReading = 0.0;
+
+    if (engineStarted)  
+    {  
+        if (headlightsSettings() == 1) 
+        {
+            //headlight settings set to OFF, switch both headlights OFF
+            rightHeadlight = OFF;
+            leftHeadlight = OFF;
+        }
+        else if (headlightsSettings() == 3) 
+        {
+            //headlight settings set to ON, switch both headlights ON
+            rightHeadlight = ON;
+            leftHeadlight = ON;
+        }
+        else if (headlightsSettings() == 2) 
+        {
+            // headlights settings switched to AUTO, both headlights are toggled on or off based on light sensor analog values (between 0 and 1)
+            lightSenorReading = lightSensor.read();
+
+            // if the room is generally bright (analog reads >= 0.66), headlights should switch OFF.
+            if (lightSenorReading >= 0.66 )
+            {
+                // the LEDs should only toggle if the light sensor detects this value, >= 0.66, for more than 2000 miliseconds
+                accumulatedHeadlightDelayTime_OFF = accumulatedHeadlightDelayTime_OFF + TIME_INCREMENT_MS;
+
+                if (accumulatedHeadlightDelayTime_OFF >= DELAY_LIGHTS_OFF_MS){
+                    // switch headlights off after a delay of 2 seconds
+                    accumulatedHeadlightDelayTime_OFF = 0;
+                    accumulatedHeadlightDelayTime_ON = 0;
+                    rightHeadlight = OFF;
+                    leftHeadlight = OFF;
                 }
             }
+            // if the room is generally dark (analog reads <= 0.33), headlights should switch ON.
+            else if (lightSenorReading <= 0.33)
+            {  
+                // the LEDs should only toggle if the light sensor detects this value, <= 0.33, for more than 1000 miliseconds
+                accumulatedHeadlightDelayTime_ON = accumulatedHeadlightDelayTime_ON + TIME_INCREMENT_MS;
+                if (accumulatedHeadlightDelayTime_ON >= DELAY_LIGHTS_ON_MS){
+                    // switch headlights on after a delay of 1 second
+                    accumulatedHeadlightDelayTime_ON = 0;
+                    accumulatedHeadlightDelayTime_OFF = 0;
+                    rightHeadlight = ON;
+                    leftHeadlight = ON;
+                }  
+            }
+        
+            // when the lighting remains ambient (between 0.33 and 0.66) there should be no change in LED status
+            else{
+                // must reset the delay time so that the delay will not accumulate over many different instances of flashing lights
+                // should only trigger LEDs if the delay accumulates over one instance of lighting change (lasting for specified duration, 1 second or 2 seconds)
+                accumulatedHeadlightDelayTime_ON = 0;
+                accumulatedHeadlightDelayTime_OFF = 0;
 
-            uartUsb.write( "\r\nNew code generated\r\n\r\n", 24 );
-            break;
-
-        default:
-            availableCommands();
-            break;
-
-        }
+            }
+            
     }
-}
-
-void availableCommands()
-{
-    uartUsb.write( "Available commands:\r\n", 21 );
-    uartUsb.write( "Press '1' to get the alarm state\r\n", 34 );
-    uartUsb.write( "Press '2' to get the gas detector state\r\n", 41 );
-    uartUsb.write( "Press '3' to get the over temperature detector state\r\n", 54 );
-    uartUsb.write( "Press '4' to enter the code sequence\r\n", 38 );
-    uartUsb.write( "Press '5' to enter a new code\r\n\r\n", 33 );
-}
-
-bool areEqual()
-{
-    int i;
-
-    for (i = 0; i < NUMBER_OF_KEYS; i++) {
-        if (codeSequence[i] != buttonsPressed[i]) {
-            return false;
-        }
     }
-
-    return true;
+    // if the engine isn't started, or is turned off, LEDs should be OFF
+    else {
+        rightHeadlight = OFF;
+        leftHeadlight = OFF;
+        }
 }

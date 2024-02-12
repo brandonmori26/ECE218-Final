@@ -2,11 +2,15 @@
 
 #include "mbed.h"
 #include "arm_book_lib.h"
+#include "display.h"
 
 #define TIME_INCREMENT_MS 10
 #define TIME_DEBOUNCE_MS 30
 #define DELAY_LIGHTS_OFF_MS 2000
 #define DELAY_LIGHTS_ON_MS 1000
+
+
+
 
 //=====[Declaration of public data types]======================================
 
@@ -48,11 +52,11 @@ debouncedIgnitionReleasedStateMachine_t ignitionState;
 
 void inputsInit();
 void outputsInit();
-void displayInit();
+void userInterfaceDisplayInit();
 
 void debounceIgnitionInit();
 bool debounceIgnition();
-void userInterfaceDisplayInit();
+
 
 void ignitionSubsystem();
 
@@ -198,56 +202,6 @@ void ignitionSubsystem()
         
     }
 }
-void displayInit()
-{
-    delay( 50 );
-    
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_FUNCTION_SET | 
-                      DISPLAY_IR_FUNCTION_SET_8BITS );
-    delay( 5 );
-            
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_FUNCTION_SET | 
-                      DISPLAY_IR_FUNCTION_SET_8BITS );
-    delay( 1 ); 
-
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_FUNCTION_SET | 
-                      DISPLAY_IR_FUNCTION_SET_8BITS );
-    delay( 1 );  
-
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_FUNCTION_SET | 
-                      DISPLAY_IR_FUNCTION_SET_8BITS | 
-                      DISPLAY_IR_FUNCTION_SET_2LINES |
-                      DISPLAY_IR_FUNCTION_SET_5x8DOTS );
-    delay( 1 );         
-
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_DISPLAY_CONTROL |
-                      DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_OFF |      
-                      DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |       
-                      DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF );       
-    delay( 1 );          
-
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_CLEAR_DISPLAY );       
-    delay( 1 ); 
-
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_ENTRY_MODE_SET |
-                      DISPLAY_IR_ENTRY_MODE_SET_INCREMENT |       
-                      DISPLAY_IR_ENTRY_MODE_SET_NO_SHIFT );                  
-    delay( 1 );           
-
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
-                      DISPLAY_IR_DISPLAY_CONTROL |
-                      DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_ON |      
-                      DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |    
-                      DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF );    
-    delay( 1 );  
-}
 
 void userInterfaceDisplayInit()
 {
@@ -257,7 +211,7 @@ void userInterfaceDisplayInit()
     displayStringWrite( "Welcome" );
     
     displayCharPositionWrite ( 0,1 );
-    displayStringWrite( "To the car!" );
+    displayStringWrite( "to the car" );
 }
 
 int headlightsSettings()

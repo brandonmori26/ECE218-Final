@@ -8,11 +8,11 @@
 // Driver seatbelt sensor (provides contact closure when fastened);
 // Passenger seatbelt sensor (provides contact closure when fastened);
 // Ignition push button (provides contact closure to request ignition);
-DigitalIn driveSeatUsed(D1);
-DigitalIn passSeatUsed(D2);
-DigitalIn driveBelt(D6);
-DigitalIn passBelt(D7);
-DigitalIn ignition(D5);
+DigitalIn driveSeatUsed(D3);
+DigitalIn passSeatUsed(D4);
+DigitalIn driveBelt(D5);
+DigitalIn passBelt(D6);
+DigitalIn ignition();
 // Alarm buzzer (sounds when ignition is inhibited);
 // Green indicator LED (lights when ignition is enabled);
 //  Blue indicator LED (lights when the engine has started);

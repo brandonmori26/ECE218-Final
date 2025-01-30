@@ -69,10 +69,6 @@ void handleIgnition()
         engineLed = ON;    // Turn on the blue LED
         uartUsb.write("Engine started.\r\n", 17);
         ignitionAttempted = true; //exit loop when ignition has been attempted
-     if(engineLed == ON){
-        if(ignitionBUTTON = 1)
-        engineLed == OFF;
-        uartUsb.write("Engine stopped.\r\n", 17);
     }
     } else {
             //ingition failed

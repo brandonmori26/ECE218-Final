@@ -103,6 +103,20 @@ void displayInhibitReasons()
     if (!pSeatBelt) uartUsb.write("Passenger seatbelt not fastened\r\n", 33);
 }
 
+ // Convert light sensor reading
+float total;
+
+float sensorUpdate() {
+    total = 0.0;
+
+    for (int i = 0; i < 10; i++) {
+
+        total += lightsens.read();
+    }
+
+    return (total/10.0);
+}
+
 void controlHeadlights()
 {
     if (!engineRunning) {
@@ -116,19 +130,6 @@ void controlHeadlights()
     if (modeValue > 66) mode = MODE_AUTO;
     else if (modeValue > 33) mode = MODE_ON;
     
-    // Convert light sensor reading (0-1) to 0-1000 scale
-    float total;
-    
-    float sensorUpdate() {
-    total = 0.0;
-
-    for (int i = 0; i < 10; i++) {
-
-        total += lightSensor.read();
-    }
-
-    return (total/10.0);
-}
     static Timer headlightTimer;
     static bool timerStarted = false;
     
@@ -137,7 +138,7 @@ void controlHeadlights()
     } else if (mode == MODE_OFF) {
         headlights = 0;
     } else if (mode == MODE_AUTO) {
-        if (lightLevel > DAY_LEVEL) {
+        if (sensorUpdate > DAY_LEVEL) {
             if (!timerStarted) {
                 headlightTimer.start();
                 timerStarted = true;
@@ -147,7 +148,7 @@ void controlHeadlights()
                 headlightTimer.reset();
                 timerStarted = false;
             }
-        } else if (lightLevel < NIGHT_LEVEL) {
+        } else if (sensorUpdate < NIGHT_LEVEL) {
             if (!timerStarted) {
                 headlightTimer.start();
                 timerStarted = true;

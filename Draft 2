@@ -1,0 +1,172 @@
+//Libraries
+#include "mbed.h"
+#include "arm_book_lib.h"
+
+
+#define NIGHT_LEVEL 30   // Equivalent to duskThreshold
+#define DAY_LEVEL 40     // Equivalent to daylightThreshold
+
+//Declaration and initialization of public global objects
+DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
+DigitalIn pSeatSens(D5);              // Passenger seat sensor
+DigitalIn dSeatSens(D6);              // Driver seat sensor
+DigitalIn pSeatBelt(D4);              // Passenger seatbelt switch
+DigitalIn dSeatBelt(D3);              // Driver seatbelt switch
+
+AnalogIn lightsens(A2);               // Light sensor (LDR)
+AnalogIn headlightMode(A1);           // Potentiometer for headlight mode
+
+DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled
+DigitalOut engineLed(LED2);           // Blue LED: Engine started
+DigitalOut alarmBuzzer(PE_10);        // Alarm Buzzer
+DigitalOut headlights(D7);            // Combined headlight output
+
+BufferedSerial uartUsb(USBTX, USBRX, 115200); // UART for messages
+
+//Declaration and initialization of public global variables
+bool engineRunning = false;           // Tracks if engine is running
+bool welcomeDisplayed = false;        // Tracks if welcome message has been shown
+bool previousButtonState = false;     // For detecting new button presses
+bool headlightsOn = false;            // Tracks headlight state
+
+enum HeadlightMode {MODE_OFF, MODE_ON, MODE_AUTO};
+
+//Function Prototypes
+void inputsInit();
+void outputsInit();
+void checkIgnitionConditions();
+void handleIgnitionButton();
+void displayInhibitReasons();
+void controlHeadlights();
+
+//Main function, the program entry point after power on or reset
+int main()
+{
+    inputsInit();
+    outputsInit();
+    
+    while (true) {
+        if (dSeatSens && !welcomeDisplayed) {
+            uartUsb.write("Welcome to enhanced alarm system model 218-W25\r\n", 48);
+            welcomeDisplayed = true;
+        }
+        if (!dSeatSens) {
+            welcomeDisplayed = false;
+        }
+        if (!engineRunning) {
+            checkIgnitionConditions();
+        }
+        handleIgnitionButton();
+        controlHeadlights();
+        delay(50);
+    }
+}
+
+//Function Implementations
+void checkIgnitionConditions()
+{
+    bool allConditionsMet = dSeatSens && pSeatSens && dSeatBelt && pSeatBelt;
+    ignitionLed = allConditionsMet;
+}
+
+void handleIgnitionButton()
+{
+    bool currentButtonState = ignitionButton;
+    if (currentButtonState && !previousButtonState) {
+        if (!engineRunning) {
+            if (ignitionLed) {
+                engineLed = 1;
+                ignitionLed = 0;
+                engineRunning = true;
+                uartUsb.write("Engine started.\r\n", 17);
+            } else {
+                alarmBuzzer = 1;
+                uartUsb.write("Ignition inhibited.\r\n", 20);
+                displayInhibitReasons();
+                delay(500);
+                alarmBuzzer = 0;
+            }
+        } else {
+            engineLed = 0;
+            engineRunning = false;
+            uartUsb.write("Engine stopped.\r\n", 17);
+        }
+    }
+    previousButtonState = currentButtonState;
+}
+
+void displayInhibitReasons()
+{
+    if (!dSeatSens) uartUsb.write("Driver seat not occupied\r\n", 25);
+    if (!pSeatSens) uartUsb.write("Passenger seat not occupied\r\n", 28);
+    if (!dSeatBelt) uartUsb.write("Driver seatbelt not fastened\r\n", 30);
+    if (!pSeatBelt) uartUsb.write("Passenger seatbelt not fastened\r\n", 33);
+}
+
+void controlHeadlights()
+{
+    if (!engineRunning) {
+        headlights = 0;
+        return;
+    }
+    
+    // Convert analog read (0-1) to integer 0-100
+    int modeValue = (int)(headlightMode.read() * 100);
+    HeadlightMode mode = MODE_OFF;
+    if (modeValue > 66) mode = MODE_AUTO;
+    else if (modeValue > 33) mode = MODE_ON;
+    
+    // Convert light sensor reading (0-1) to 0-1000 scale
+    int lightLevel = (int)(lightsens.read() * 1000);
+    static Timer headlightTimer;
+    static bool timerStarted = false;
+    
+    if (mode == MODE_ON) {
+        headlights = 1;
+    } else if (mode == MODE_OFF) {
+        headlights = 0;
+    } else if (mode == MODE_AUTO) {
+        if (lightLevel > DAY_LEVEL) {
+            if (!timerStarted) {
+                headlightTimer.start();
+                timerStarted = true;
+            } else if (headlightTimer.elapsed_time().count() >= 2000000) { // 2 seconds
+                headlights = 0;
+                headlightTimer.stop();
+                headlightTimer.reset();
+                timerStarted = false;
+            }
+        } else if (lightLevel < NIGHT_LEVEL) {
+            if (!timerStarted) {
+                headlightTimer.start();
+                timerStarted = true;
+            } else if (headlightTimer.elapsed_time().count() >= 1000000) { // 1 second
+                headlights = 1;
+                headlightTimer.stop();
+                headlightTimer.reset();
+                timerStarted = false;
+            }
+        } else {
+            headlightTimer.stop();
+            headlightTimer.reset();
+            timerStarted = false;
+        }
+    }
+}
+
+void inputsInit()
+{
+    ignitionButton.mode(PullDown);
+    pSeatSens.mode(PullDown);
+    dSeatSens.mode(PullDown);
+    pSeatBelt.mode(PullDown);
+    dSeatBelt.mode(PullDown);
+}
+
+void outputsInit()
+{
+    ignitionLed = 0;
+    engineLed = 0;
+    alarmBuzzer = 0;
+    headlights = 0;
+}

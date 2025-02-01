@@ -6,6 +6,8 @@
 #define DAY_LEVEL 40     // Daylight level
 #define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
 #define TIME_INCREMENT_MS 50     // Main loop delay time
+#define AUTO_THRESHOLD 0.66     // Potentiometer threshold for AUTO
+#define OFF_THRESHOLD 0.33      //Potentiometer threshold for OFF
 
 //Declaration and initialization of public global objects
 DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
@@ -44,7 +46,7 @@ void handleIgnitionButton();
 void displayInhibitReasons();
 void controlHeadlights();
 float sensorUpdate();
-HeadlightMode getHeadlightMode();  //
+HeadlightMode getHeadlightMode(); 
 
 //Main function
 int main()
@@ -52,7 +54,7 @@ int main()
     inputsInit();
     outputsInit();
     
-    // Initialize the light readings USE ARRAY LIKE CHAP 3
+    // Initialize the light readings USE ARRAY IN CHAP 3
     for (int i = 0; i < LIGHT_SENSOR_SAMPLES; i++) {
         lightReadingsArray[i] = 0.0;
     }
@@ -75,9 +77,9 @@ int main()
 }
 // Helper function to determine headlight mode from potentiometer
 HeadlightMode getHeadlightMode() {
-    float potValue = headlightMode.read();
-    if (potValue < 0.33) return MODE_OFF;
-    if (potValue < 0.66) return MODE_AUTO;
+    float potentialValue = headlightMode.read();
+    if (potentialValue < OFF_THRESHOLD) return MODE_OFF;
+    if (potentialValue < AUTO_THRESHOLD) return MODE_AUTO;
     return MODE_ON;
 }
 
@@ -97,7 +99,7 @@ float sensorUpdate() //USE TEMPERATURE SENSOR MODULE
         lightReadingsSum += lightReadingsArray[i];
     }
     
-    // Scale to 0-100 and invert (higher number means darker)
+    // Scale to 0-100 (higher number means darker)
     return (1.0 - (lightReadingsSum / LIGHT_SENSOR_SAMPLES)) * 100;
 }
 
@@ -110,7 +112,7 @@ void controlHeadlights()
         accumulatedTimeDelay = 0;
         return;
     }
-    
+    //get variables from previous functions
     HeadlightMode mode = getHeadlightMode();
     float lightLevel = sensorUpdate();
     

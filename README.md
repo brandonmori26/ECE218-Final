@@ -10,3 +10,4 @@ https://github.com/MollyFry/218-Project-1/blob/main/Our%20Raw%20Code
 
 IGNITION SUBSYSTEM and HEADLIGHT SUBSYTEM:
 These subsystems test results tables are on the google doc linked on NEXUS
+https://docs.google.com/document/d/1R5P6nQwMOmhquHuo7xOgSe1NgeffuTFlbCNmgtICz6Y/edit?tab=t.0

@@ -2,7 +2,7 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-#define NIGHT_LEVEL 30   // Dusk level
+#define NIGHT_LEVEL 35   // Dusk level
 #define DAY_LEVEL 40     // Daylight level
 #define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
 #define TIME_INCREMENT_MS 50     // Main loop delay time

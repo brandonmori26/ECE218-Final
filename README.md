@@ -8,13 +8,10 @@ This project implements an enhanced driver safety system design for Driver's ED 
 STARTING REPOSITORY:
 https://github.com/MollyFry/218-Project-1/blob/main/Our%20Raw%20Code
 
-IGNITION SUBSYSTEM and HEADLIGHT SUBSYTEM:
-These subsystems test results tables are on the google doc linked on NEXUS
-https://docs.google.com/document/d/1R5P6nQwMOmhquHuo7xOgSe1NgeffuTFlbCNmgtICz6Y/edit?tab=t.0
-
+IGNITION SUBSYSTEM:
 | Specifications | Test Result | Comments |
 | :---         |     :---:      |          ---: |
-| git status   | git status     | git status    |
+|Enable engine start while both seats are occupied and seatbelts fastened. Otherwise print appropriate error message.    | git status     | git status    |
 | git diff     | git diff       | git diff      |
 | git status   | git status     | git status    |
 | git diff     | git diff       | git diff      |

@@ -11,7 +11,7 @@ https://github.com/MollyFry/218-Project-1/blob/main/Our%20Raw%20Code
 IGNITION SUBSYSTEM:
 | Specifications | Test Result | Comments |
 | :---         |     :---:      |          ---: |
-|Enable engine start while both seats are occupied and seatbelts fastened. Otherwise print appropriate error message.    | git status     | git status    |
+|Enable engine start while both seats are occupied and seatbelts fastened. Otherwise print appropriate error message.| Pass | All error messages are displayed on the serial monitor depending on which error occurred. |
 | git diff     | git diff       | git diff      |
 | git status   | git status     | git status    |
 | git diff     | git diff       | git diff      |

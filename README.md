@@ -21,6 +21,6 @@ HEADLIGHT SUBSYSTEM:
 | :---         |     :---:      |          ---: |
 | Headlights are only enabled when engine is running (engineLed is ON). | Pass |  |
 | If the engine is running, and the user selects: ON, turn on both low beam lamps; if they select OFF, turn off all lamps. |Pass |OFF position is 0 on the potentiometer, ON position is anything past 0.66 on potentiometer. 
-|If the user selects the AUTO position: When the light level is above a “daylight” level, switch headlights off after a delay of 2 seconds.When the light level is below a “dusk” level, switch headlights on after a delay of 1 second.
- | Pass| This system functioned as intended. The time delay was difficult to capture accurately in a demo video, but there was an obvious time delay present for both “daylight” and “dusk” levels. |
+|If the user selects the AUTO position: When the light level is above a “daylight” level, switch headlights off after a delay of 2 seconds.When the light level is below a “dusk” level, switch headlights on after a delay of 1 second.|
+| Pass| This system functioned as intended. The time delay was difficult to capture accurately in a demo video, but there was an obvious time delay present for both “daylight” and “dusk” levels. |
 | When the engine is running, if a passenger unbuckles the belt and leaves the vehicle, the headlight system will remain on.  | Pass   | As long as engineLed is on, the headlight system will function as intended.|

@@ -157,7 +157,7 @@ void controlHeadlights()
         }
     }
 }
-
+//REST IS SAME AS PROJ 1 CODE
 void checkIgnitionConditions()
 {
     bool allConditionsMet = dSeatSens && pSeatSens && dSeatBelt && pSeatBelt;

@@ -12,6 +12,6 @@ IGNITION SUBSYSTEM:
 | Specifications | Test Result | Comments |
 | :---         |     :---:      |          ---: |
 |Enable engine start while both seats are occupied and seatbelts fastened. Otherwise print appropriate error message.| Pass | All error messages are displayed on the serial monitor depending on which error occurred. |
-| git diff     | git diff       | git diff      |
-| git status   | git status     | git status    |
+|Start the engine (light the blue LED, turn off Green) when ignition is enabled (green LED) and ignition button is pressed  (before the button is released).|Pass| Serial Monitor will display: Engine Started  |
+| Keep the engine running even if the driver/passenger should unfasten belt and exit the vehicle.|  Pass | |
 | git diff     | git diff       | git diff      |

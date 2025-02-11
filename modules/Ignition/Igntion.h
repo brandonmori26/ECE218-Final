@@ -4,13 +4,35 @@
 #define _Ignition_H_
 
 //=====[Declarations (prototypes) of public functions]=========================
-void handleIgnitionButton();
-void displayInhibitReasons();
+bool ignitionUpdate()
+{
+    welcomeMessage();
+    ignitionEnable();
+    if (!engineStarted && debounceIgnition()){
+        uartUsb.write("Ignition attempted.\r\n\r\n", 23);
+        if (!greenLED){
+            sirenPin = BUZZER_ON;
+            errorMessage();
+            engineStarted = false;
+        }
+        else{
+            sirenPin = BUZZER_OFF;
+            greenLED = OFF;
+            blueLED = ON;
+            uartUsb.write("Engine started.\r\n\r\n", 19);
+            engineStarted = true;
+        }
+    }
+    else if (engineStarted && debounceIgnition()){
+        uartUsb.write("Engine off.\r\n\r\n", 15);
+        engineStarted = false;
+        blueLED = OFF;
+    }
+    
+    return engineStarted;
+}
 
-//=========[Declarations of Private Variables]=========================
-bool engineRunning = false;           // Tracks if engine is running
-bool welcomeDisplayed = false;        // Tracks if welcome message has been shown
-bool previousButtonState = false;     // For detecting new button presses
+
 
 //=====[#include guards - end]=================================================
 

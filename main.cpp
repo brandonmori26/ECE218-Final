@@ -8,5 +8,6 @@ int  main(){
     
     while(true)
         ignitionUpdate();
-        
+        delay(TIME_INCREMENT_MS);
+    
 }

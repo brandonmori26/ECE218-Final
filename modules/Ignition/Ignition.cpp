@@ -9,10 +9,10 @@ void checkIgnitionConditions();
 
 //Declaration and initialization of public global objects
 DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
-DigitalIn pSeatSens(D10);              // Passenger seat sensor
-DigitalIn dSeatSens(D11);              // Driver seat sensor
-DigitalIn pSeatBelt(D12);              // Passenger seatbelt switch
-DigitalIn dSeatBelt(D13);              // Driver seatbelt switch
+DigitalIn passengerPresent(D10);              // Passenger seat sensor
+DigitalIn drivePresent(D11);              // Driver seat sensor
+DigitalIn passengerSeatbelt(D12);              // Passenger seatbelt switch
+DigitalIn driverSeatbelt(D13);              // Driver seatbelt switch
 
 
 DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled
@@ -21,76 +21,93 @@ DigitalOut alarmBuzzer(D15);        // Alarm Buzzer
 BufferedSerial uartUsb(USBTX, USBRX, 115200); // UART for messages
 
 //=====[Implementations of public functions]===================================
-void checkIgnitionConditions()
-{
-    // Enable ignition only when all conditions are met
-    bool allConditionsMet = dSeatSens && pSeatSens && dSeatBelt && pSeatBelt;
-    ignitionLed = allConditionsMet;
-}
-
-void handleIgnitionButton()
-{
-    bool currentButtonState = ignitionButton;
-    
-    // Detect new button press (button is pressed and wasn't pressed before)
-    if (currentButtonState && !previousButtonState) {
-        if (!engineRunning) {
-            // Try to start engine
-            if (ignitionLed) {
-                // Normal ignition
-                engineLed = 1;
-                ignitionLed = 0;
-                engineRunning = true;
-                uartUsb.write("Engine started.\r\n", 17);
-            } else {
-                // Inhibited ignition
-                alarmBuzzer = 1;
-                uartUsb.write("Ignition inhibited.\r\n", 20);
-                displayInhibitReasons();
-                ThisThread::sleep_for(500ms);  // Keep buzzer on briefly
-                alarmBuzzer = 0;
-            }
-        } else {
-            // Stop engine on new button press while engine is running
-            engineLed = 0;
-            engineRunning = false;
-            uartUsb.write("Engine stopped.\r\n", 17);
-        }
-    }
-    
-    previousButtonState = currentButtonState;
-}
-
-void displayInhibitReasons()
-{
-    if (!dSeatSens) {
-        uartUsb.write("Driver seat not occupied\r\n", 25);
-    }
-    if (!pSeatSens) {
-        uartUsb.write("Passenger seat not occupied\r\n", 28);
-    }
-    if (!dSeatBelt) {
-        uartUsb.write("Driver seatbelt not fastened\r\n", 30);
-    }
-    if (!pSeatBelt) {
-        uartUsb.write("Passenger seatbelt not fastened\r\n", 33);
-    }
-}
-
 void inputsInit()
 {
-    // Configure inputs as pull-down to ensure default state is LOW
-    ignitionButton.mode(PullDown);
-    pSeatSens.mode(PullDown);
-    dSeatSens.mode(PullDown);
-    pSeatBelt.mode(PullDown);
-    dSeatBelt.mode(PullDown);
+    driverPresent.mode(PullDown);
+    passengerPresent.mode(PullDown);
+    driverSeatbelt.mode(PullDown);
+    passengerSeatbelt.mode(PullDown);
 }
 
-void outputsInit()
+void outputsInitIgnition()
 {
-    // Initialize outputs to OFF
-    ignitionLed = 0;
-    engineLed = 0;
-    alarmBuzzer = 0;
+    greenLED = OFF;
+    blueLED = OFF;
+    sirenPin = BUZZER_OFF;
+}
+
+void debounceIgnitionInit()
+{
+    if( ignitionButton ) {
+        ignitionButtonState = BUTTON_UP;
+    } else {
+        ignitionButtonState = BUTTON_DOWN;
+    }
+}
+void ignitionEnable()
+{
+    if (driverPresent && driverSeatbelt && passengerPresent && passengerSeatbelt){
+        greenLED = ON;
+    }
+    else{
+        greenLED = OFF;
+    }
+}
+
+void welcomeMessage()
+{
+    if (driverPresent && !driverWelcomed){
+        uartUsb.write("Welcome to enhanced alarm system model 218-W25\r\n\r\n", 50);
+        driverWelcomed = true;
+    }
+    else if (!driverPresent){
+        driverWelcomed = false;
+    }
+}
+
+void errorMessage()
+{
+
+    uartUsb.write("Ignition Inhibited\r\n\r\n", 22);
+    
+    if(!driverPresent){
+        uartUsb.write("Driver seat not occupied.\r\n\r\n", 29);
+    } 
+    if(!driverSeatbelt){
+        uartUsb.write("Driver seatbelt not fastened.\r\n\r\n", 33);
+    }
+    if(!passengerPresent){
+        uartUsb.write("Passenger seat not occupied.\r\n\r\n", 32);
+    }
+    if(!passengerSeatbelt){
+        uartUsb.write("Passenger seatbelt not fastened.\r\n\r\n", 36);
+    }
+}
+
+bool ignitionUpdate()
+{
+    welcomeMessage();
+    ignitionEnable();
+    if (!engineStarted && debounceIgnition()){
+        uartUsb.write("Ignition attempted.\r\n\r\n", 23);
+        if (!greenLED){
+            sirenPin = BUZZER_ON;
+            errorMessage();
+            engineStarted = false;
+        }
+        else{
+            sirenPin = BUZZER_OFF;
+            greenLED = OFF;
+            blueLED = ON;
+            uartUsb.write("Engine started.\r\n\r\n", 19);
+            engineStarted = true;
+        }
+    }
+    else if (engineStarted && debounceIgnition()){
+        uartUsb.write("Engine off.\r\n\r\n", 15);
+        engineStarted = false;
+        blueLED = OFF;
+    }
+    
+    return engineStarted;
 }

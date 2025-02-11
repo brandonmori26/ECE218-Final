@@ -54,6 +54,49 @@ void ignitionEnable()
     }
 }
 
+bool debounceIgnition()
+{
+    bool ignitionReleased = false;
+
+    switch( ignitionButtonState ) {
+        case BUTTON_UP:
+            if( ignitionButton ) {
+                ignitionButtonState = BUTTON_FALLING;
+                accumulatedButtonTime = 0;
+            }
+            break;
+
+        case BUTTON_FALLING:
+            if( accumulatedButtonTime >= TIME_DEBOUNCE_MS ) {
+                if( ignitionButton ) {
+                    ignitionButtonState = BUTTON_DOWN;
+                } else {
+                ignitionButtonState = BUTTON_UP;
+                }
+            }
+            accumulatedButtonTime = accumulatedButtonTime + TIME_INCREMENT_MS;
+            break;
+        
+        case BUTTON_DOWN:
+            if (!ignitionButton){
+                ignitionButtonState = BUTTON_RISING;
+                accumulatedButtonTime = 0;
+            }
+            break;
+
+        case BUTTON_RISING:
+            if (!ignitionButton){
+                ignitionButtonState = BUTTON_UP;
+                ignitionReleased = true;
+            }
+            else{
+                ignitionButtonState = BUTTON_DOWN;
+            }
+            accumulatedButtonTime = accumulatedButtonTime + TIME_INCREMENT_MS;
+            break;
+    }
+    return ignitionReleased;
+}
 void welcomeMessage()
 {
     if (driverPresent && !driverWelcomed){

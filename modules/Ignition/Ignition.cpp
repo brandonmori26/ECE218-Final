@@ -3,7 +3,7 @@
 #include "arm_book_lib.h"
 
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of private functions]===================================
 void checkIgnitionConditions()
 {
     // Enable ignition only when all conditions are met

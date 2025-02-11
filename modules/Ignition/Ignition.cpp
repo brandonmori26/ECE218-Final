@@ -4,10 +4,10 @@
 
 //Declaration and initialization of public global objects
 DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
-DigitalIn pSeatSens(D5);              // Passenger seat sensor
-DigitalIn dSeatSens(D6);              // Driver seat sensor
-DigitalIn pSeatBelt(D4);              // Passenger seatbelt switch
-DigitalIn dSeatBelt(D3);              // Driver seatbelt switch
+DigitalIn pSeatSens(D10);              // Passenger seat sensor
+DigitalIn dSeatSens(D11);              // Driver seat sensor
+DigitalIn pSeatBelt(D12);              // Passenger seatbelt switch
+DigitalIn dSeatBelt(D13);              // Driver seatbelt switch
 
 
 DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled

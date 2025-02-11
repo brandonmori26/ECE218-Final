@@ -4,8 +4,13 @@
 
 //=====[Declaration and initialization of private global variables]============
 void inputsInit();
-void outputsInit();
-void checkIgnitionConditions();
+void debounceIgnitionInit();
+void ignitionEnable();
+void outputsInitIgnition();
+void welcomeMessage();
+void errorMessage();
+bool debounceIgnition();
+
 
 //Declaration and initialization of public global objects
 DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
@@ -127,6 +132,7 @@ void errorMessage()
     }
 }
 
+//PUBLIC FUNCTION 
 bool ignitionUpdate()
 {
     welcomeMessage();

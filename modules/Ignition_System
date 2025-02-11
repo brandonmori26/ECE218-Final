@@ -51,7 +51,7 @@ int main()
         handleIgnitionButton();
         
         // Small delay to prevent too rapid checking
-        ThisThread::sleep_for(50ms);
+        delay(50)
     }
 }
 

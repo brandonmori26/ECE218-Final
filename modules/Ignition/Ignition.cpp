@@ -2,17 +2,24 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//=====[Declaration and initialization of private global variables]============
-void inputsInit();
-void debounceIgnitionInit();
-void ignitionEnable();
-void outputsInitIgnition();
-void welcomeMessage();
-void errorMessage();
-bool debounceIgnition();
+//=====[Defines]===============================================================
 
+#define BUZZER_ON 0
+#define BUZZER_OFF 1
+#define TIME_INCREMENT_MS 10
+#define TIME_DEBOUNCE_MS 30
+
+//=====[Declaration of public data types]======================================
+
+typedef enum{
+    BUTTON_UP,
+    BUTTON_FALLING,
+    BUTTON_DOWN,
+    BUTTON_RISING
+} debouncedIgnitionReleasedStateMachine_t;
 
 //Declaration and initialization of public global objects
+
 DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
 DigitalIn passengerPresent(D10);              // Passenger seat sensor
 DigitalIn driverPresent(D11);              // Driver seat sensor
@@ -24,6 +31,28 @@ DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled
 DigitalOut engineLed(LED2);           // Blue LED: Engine started
 DigitalOut alarmBuzzer(D15);        // Alarm Buzzer
 BufferedSerial uartUsb(USBTX, USBRX, 115200); // UART for messages
+
+
+//=====[Declaration and initialization of public global variables]=============
+
+int accumulatedButtonTime = 0;
+int accumulatedHeadlightDelayTime_ON = 0;
+int accumulatedHeadlightDelayTime_OFF = 0;
+
+bool engineStarted = false;
+bool driverWelcomed = false;
+
+debouncedIgnitionReleasedStateMachine_t ignitionButtonState;
+
+//=====[Declaration and initialization of private global variables]============
+void inputsInit();
+void debounceIgnitionInit();
+void ignitionEnable();
+void outputsInitIgnition();
+void welcomeMessage();
+void errorMessage();
+bool debounceIgnition();
+
 
 //=====[Implementations of public functions]===================================
 void inputsInit()

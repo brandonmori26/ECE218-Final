@@ -13,7 +13,7 @@ DigitalIn dSeatBelt(D13);              // Driver seatbelt switch
 DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled
 DigitalOut engineLed(LED2);           // Blue LED: Engine started
 DigitalOut alarmBuzzer(PE_10);        // Alarm Buzzer
-
+BufferedSerial uartUsb(USBTX, USBRX, 115200); // UART for messages
 
 
 //=====[Implementations of private functions]===================================

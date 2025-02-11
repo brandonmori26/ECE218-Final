@@ -4,7 +4,7 @@
 #define _Ignition_H_
 
 //=====[Declarations (prototypes) of public functions]=========================
-bool ignitionUpdate()
+bool ignitionUpdate();
 
 //=====[#include guards - end]=================================================
 

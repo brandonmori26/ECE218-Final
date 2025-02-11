@@ -15,7 +15,7 @@ bool debounceIgnition();
 //Declaration and initialization of public global objects
 DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
 DigitalIn passengerPresent(D10);              // Passenger seat sensor
-DigitalIn drivePresent(D11);              // Driver seat sensor
+DigitalIn driverPresent(D11);              // Driver seat sensor
 DigitalIn passengerSeatbelt(D12);              // Passenger seatbelt switch
 DigitalIn driverSeatbelt(D13);              // Driver seatbelt switch
 

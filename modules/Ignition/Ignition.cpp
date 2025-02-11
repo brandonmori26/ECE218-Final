@@ -2,6 +2,11 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
+//=====[Declaration and initialization of private global variables]============
+void inputsInit();
+void outputsInit();
+void checkIgnitionConditions();
+
 //Declaration and initialization of public global objects
 DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
 DigitalIn pSeatSens(D10);              // Passenger seat sensor
@@ -12,11 +17,10 @@ DigitalIn dSeatBelt(D13);              // Driver seatbelt switch
 
 DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled
 DigitalOut engineLed(LED2);           // Blue LED: Engine started
-DigitalOut alarmBuzzer(PE_10);        // Alarm Buzzer
+DigitalOut alarmBuzzer(D15);        // Alarm Buzzer
 BufferedSerial uartUsb(USBTX, USBRX, 115200); // UART for messages
 
-
-//=====[Implementations of private functions]===================================
+//=====[Implementations of public functions]===================================
 void checkIgnitionConditions()
 {
     // Enable ignition only when all conditions are met
@@ -89,3 +93,4 @@ void outputsInit()
     ignitionLed = 0;
     engineLed = 0;
     alarmBuzzer = 0;
+}

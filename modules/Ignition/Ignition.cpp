@@ -2,6 +2,19 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
+//Declaration and initialization of public global objects
+DigitalIn ignitionButton(BUTTON1);    // Simulates the ignition button
+DigitalIn pSeatSens(D5);              // Passenger seat sensor
+DigitalIn dSeatSens(D6);              // Driver seat sensor
+DigitalIn pSeatBelt(D4);              // Passenger seatbelt switch
+DigitalIn dSeatBelt(D3);              // Driver seatbelt switch
+
+
+DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled
+DigitalOut engineLed(LED2);           // Blue LED: Engine started
+DigitalOut alarmBuzzer(PE_10);        // Alarm Buzzer
+
+
 
 //=====[Implementations of private functions]===================================
 void checkIgnitionConditions()

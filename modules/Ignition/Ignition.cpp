@@ -1,12 +1,12 @@
 //=====[Libraries]=============================================================
 #include "mbed.h"
 #include "arm_book_lib.h"
+#include "Ignition.h"
 
 //=====[Defines]===============================================================
 
 #define BUZZER_ON 0
 #define BUZZER_OFF 1
-#define TIME_INCREMENT_MS 10
 #define TIME_DEBOUNCE_MS 30
 
 //=====[Declaration of public data types]======================================
@@ -27,9 +27,9 @@ DigitalIn passengerSeatbelt(D12);              // Passenger seatbelt switch
 DigitalIn driverSeatbelt(D13);              // Driver seatbelt switch
 
 
-DigitalOut ignitionLed(LED1);         // Green LED: Ignition enabled
-DigitalOut engineLed(LED2);           // Blue LED: Engine started
-DigitalOut alarmBuzzer(D15);        // Alarm Buzzer
+DigitalOut greenLED(LED1);         // Green LED: Ignition enabled
+DigitalOut blueLED(LED2);           // Blue LED: Engine started
+DigitalOut sirenPin(D15);        // Alarm Buzzer
 BufferedSerial uartUsb(USBTX, USBRX, 115200); // UART for messages
 
 
@@ -45,10 +45,8 @@ bool driverWelcomed = false;
 debouncedIgnitionReleasedStateMachine_t ignitionButtonState;
 
 //=====[Declaration and initialization of private global variables]============
-void inputsInit();
 void debounceIgnitionInit();
 void ignitionEnable();
-void outputsInitIgnition();
 void welcomeMessage();
 void errorMessage();
 bool debounceIgnition();

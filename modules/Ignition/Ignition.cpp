@@ -56,7 +56,7 @@ bool debounceIgnition();
 void inputsInit()
 {
     driverPresent.mode(PullDown);
-    passengerPresent.mode(PullDown);
+    passengerPresent.mode(PullUp);
     driverSeatbelt.mode(PullDown);
     passengerSeatbelt.mode(PullDown);
 }
@@ -78,7 +78,7 @@ void debounceIgnitionInit()
 }
 void ignitionEnable()
 {
-    if (driverPresent && driverSeatbelt && passengerPresent && passengerSeatbelt){
+    if (driverPresent && driverSeatbelt && !passengerPresent && passengerSeatbelt){
         greenLED = ON;
     }
     else{
@@ -151,7 +151,7 @@ void errorMessage()
     if(!driverSeatbelt){
         uartUsb.write("Driver seatbelt not fastened.\r\n\r\n", 33);
     }
-    if(!passengerPresent){
+    if(passengerPresent){
         uartUsb.write("Passenger seat not occupied.\r\n\r\n", 32);
     }
     if(!passengerSeatbelt){

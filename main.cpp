@@ -7,8 +7,8 @@
 
 
 int  main(){
-    void inputsInit();
-    void outputsInitIgnition();
+    inputsInit();
+    outputsInitIgnition();
     
     while(true)
         ignitionUpdate();

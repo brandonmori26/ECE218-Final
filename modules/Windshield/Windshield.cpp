@@ -12,7 +12,17 @@ PwmOut servo(PF_9); //chargoggagoggmanchauggagoggchaubunagungamaugg
 void PwmInit();
 void PwmMax();
 void PwmMin();
-// main() runs in its own thread in the OS
+
+//=====[Declaration of private data types]=====================================
+enum WiperMode {
+    OFF,
+    HI,
+    LO,
+    INT
+};
+
+
+//=====[Declaration and initialization of private global variables]============
 
 void PwmInit()
 {

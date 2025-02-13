@@ -9,7 +9,9 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void displayInit( void );
+static void displayInit( void );
+
+static void displayUpdate();
  
 void displayCharPositionWrite( uint8_t charPositionX, uint8_t charPositionY );
 

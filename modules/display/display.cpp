@@ -54,6 +54,8 @@
 #define DISPLAY_PIN_D6 13 
 #define DISPLAY_PIN_D7 14 
 
+#define DISPLAY_REFRESH_TIME_MS 1000
+
 //=====[Declaration of private data types]=====================================
 
 //=====[Declaration and initialization of public global objects]===============
@@ -81,9 +83,15 @@ static void displayPinWrite( uint8_t pinName, int value );
 static void displayDataBusWrite( uint8_t dataByte );
 static void displayCodeWrite( bool type, uint8_t dataBus );
 
+static void userInterfaceDisplayInit();
+static void userInterfaceDisplayUpdate();
+
+void displayStart( void );
+
+
 //=====[Implementations of public functions]===================================
 
-void displayInit()
+void displayStart()
 {
     delay( 50 );
     
@@ -208,4 +216,29 @@ static void displayDataBusWrite( uint8_t dataBus )
     delay( 1 );
     displayPinWrite( DISPLAY_PIN_EN, OFF );  
     delay( 1 );                   
+}
+
+
+static void displayInit()
+{
+    displayStart();
+     
+    displayCharPositionWrite ( 0,0 );
+    displayStringWrite( "Wiper Mode:" );
+
+    displayCharPositionWrite ( 0,1 );
+    displayStringWrite( "Delay Time:" );
+    
+}
+
+static void userInterfaceDisplayUpdate()
+{
+    static int accumulatedDisplayTime = 0;
+    char temperatureString[3] = "";
+    
+    if( accumulatedDisplayTime >=
+        DISPLAY_REFRESH_TIME_MS ) {
+
+        accumulatedDisplayTime = 0;
+}
 }

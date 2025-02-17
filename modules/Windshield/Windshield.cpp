@@ -5,12 +5,13 @@
 #define DUTY_MIN 0.025
 #define DUTY_MAX 0.125
 #define DUTY_67 0.0584
-#define DUTY_30RPM 0.00334
+#define DUTY_INCREMENT 0.00334
 
 
 #define LOW_SPEED_DELAY_30RPM 1250 // delay time for 30 RPM
 #define HIGH_SPEED_DELAY_40RPM 750 // delay time for 40 RPM
-#define LOW_FLUID_DELAY 37    // delay for fluid positional mode movement
+#define LOW_DELAY_FLUID 37    // delay for fluid positional mode movement
+#define HIGH_DELAY_FLUID 28
 #define WIPER_FULLRANGE_DELAY 370 //Time it takes for wiper to make full 67 degree rotation
 
 #define NUMBER_OF_INCREMENTS_30RPM 20
@@ -32,19 +33,22 @@ PwmOut servo(PF_9); //chargoggagoggmanchauggagoggchaubunagungamaugg
 float currentDutyCycle;
 bool wiper67 = false;
 
-//=====[Implementations of public functions]===================================
+//=====[Declarations (prototypes) of private functions]=========================
 
 void PwmInit();
 void PwmMax();
-void PwmMin();
 void Pwm67();
 void FullWipe();
-// main() runs in its own thread in the OS
+
+void LowSpeed();
+
+
+//=====[Implementations of public functions]===================================
 
 void PwmInit()
 {
     servo.period(PERIOD);
-    PwmMin();
+    servo.write(DUTY_MIN);
 
 }
 
@@ -62,6 +66,31 @@ void FullWipe()
 }
 
 
+void LowSpeed()
+{
+    int i;
+    static float currentDutyCycle = DUTY_MIN;
 
 
+    if (!wiper67) 
+    {
+        currentDutyCycle = currentDutyCycle + DUTY_INCREMENT;
+        servo.write(currentDutyCycle);
+        delay(LOW_FLUID_DELAY);
+            
+        if (currentDutyCycle > DUTY_67){ wiper67 = true; }
+    }
+    else if(wiper67)
+    {
+        currentDutyCycle = currentDutyCycle - DUTY_INCREMENT;
+        servo.write(currentDutyCycle);
+        delay(LOW_FLUID_DELAY);
 
+        if (currentDutyCycle < DUTY_MIN)
+        {
+            currentDutyCycle = DUTY_MIN;
+            wiper67 = false;
+        }
+    }
+    
+}

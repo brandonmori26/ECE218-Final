@@ -1,5 +1,6 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
+#include "Windshield.h"
 
 #define PERIOD 0.02
 #define DUTY_MIN 0.025
@@ -13,6 +14,10 @@
 #define LOW_DELAY_FLUID 37    // delay for fluid positional mode movement
 #define HIGH_DELAY_FLUID 28
 #define WIPER_FULLRANGE_DELAY 370 //Time it takes for wiper to make full 67 degree rotation
+#define INT_SHORT_DELAY 3000
+#define INT_MEDIUM_DELAY 6000
+#define INT_LONG_DELAY 9000
+#define INT_TIME_INCREMENT 10
 
 #define NUMBER_OF_INCREMENTS_30RPM 20
 
@@ -26,6 +31,12 @@ PwmOut servo(PF_9); //chargoggagoggmanchauggagoggchaubunagungamaugg
 
 float currentDutyCycle;
 bool wiper67 = false;
+bool revCompleted = false;
+
+int accumulatedDelayTime = 0;
+
+WiperMode_t wiperMode;
+IntMode_t intMode;
 
 //=====[Declarations (prototypes) of private functions]=========================
 
@@ -54,21 +65,9 @@ void PwmMax()
     servo.write(DUTY_MAX);
 }
 
-void FullWipe()
-{
-    servo.write(DUTY_67);
-    delay(370);
-    servo.write(DUTY_MIN);
-    delay(370);
-}
-
-
 void LowSpeed()
 {
-    int i;
-    static float currentDutyCycle = DUTY_MIN;
-
-
+    revCompleted = false;
     if (!wiper67) 
     {
         currentDutyCycle = currentDutyCycle + DUTY_INCREMENT;
@@ -77,7 +76,7 @@ void LowSpeed()
             
         if (currentDutyCycle > DUTY_67){ wiper67 = true; }
     }
-    else if(wiper67)
+    else
     {
         currentDutyCycle = currentDutyCycle - DUTY_INCREMENT;
         servo.write(currentDutyCycle);
@@ -87,16 +86,13 @@ void LowSpeed()
         {
             currentDutyCycle = DUTY_MIN;
             wiper67 = false;
+            revCompleted = true;
         }
     }
 }
 
 void HighSpeed()
 {
-    int i;
-    static float currentDutyCycle = DUTY_MIN;
-
-
     if (!wiper67) 
     {
         currentDutyCycle = currentDutyCycle + DUTY_INCREMENT;
@@ -119,8 +115,37 @@ void HighSpeed()
     }
 }
 
+void FullWipe(int delayTime)
+{
+    static int accumulatedDelayTime = 0;
+
+    LowSpeed();
+    if(revCompleted && accumulatedDelayTime < delayTime)
+    {
+        delay(INT_TIME_INCREMENT);
+        accumulatedDelayTime = accumulatedDelayTime + INT_TIME_INCREMENT;
+    }
+}
+
 void IntermittentMode()
 {
-    
+    switch(intMode)
+    {
+        case SHORT:
+            FullWipe(INT_SHORT_DELAY);
+
+            break;
+
+        case MEDIUM:
+            FullWipe(INT_MEDIUM_DELAY);
+
+            break;
+
+        case LONG:
+            FullWipe(INT_LONG_DELAY);
+
+            break;
+    }
+
 }
 

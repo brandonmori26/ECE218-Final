@@ -7,7 +7,7 @@
 
 //=====[Declaration of public data types]======================================
 typedef enum {
-    OFF,
+    OFF_MODE,
     HI,
     LO,
     INT

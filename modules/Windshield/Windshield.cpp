@@ -16,13 +16,7 @@
 
 #define NUMBER_OF_INCREMENTS_30RPM 20
 
-//=====[Declaration of private data types]=====================================
-enum WiperMode {
-    OFF,
-    HI,
-    LO,
-    INT
-};
+//=====[Declaration of private data types]======================================
 
 //=====[Declaration and initialization of private global objects]===============
 
@@ -41,9 +35,12 @@ void Pwm67();
 void FullWipe();
 
 void LowSpeed();
+void HighSpeed();
+void IntermittentMode();
 
 
 //=====[Implementations of public functions]===================================
+
 
 void PwmInit()
 {
@@ -76,7 +73,7 @@ void LowSpeed()
     {
         currentDutyCycle = currentDutyCycle + DUTY_INCREMENT;
         servo.write(currentDutyCycle);
-        delay(LOW_FLUID_DELAY);
+        delay(LOW_DELAY_FLUID);
             
         if (currentDutyCycle > DUTY_67){ wiper67 = true; }
     }
@@ -84,7 +81,7 @@ void LowSpeed()
     {
         currentDutyCycle = currentDutyCycle - DUTY_INCREMENT;
         servo.write(currentDutyCycle);
-        delay(LOW_FLUID_DELAY);
+        delay(LOW_DELAY_FLUID);
 
         if (currentDutyCycle < DUTY_MIN)
         {
@@ -92,5 +89,38 @@ void LowSpeed()
             wiper67 = false;
         }
     }
+}
+
+void HighSpeed()
+{
+    int i;
+    static float currentDutyCycle = DUTY_MIN;
+
+
+    if (!wiper67) 
+    {
+        currentDutyCycle = currentDutyCycle + DUTY_INCREMENT;
+        servo.write(currentDutyCycle);
+        delay(HIGH_DELAY_FLUID);
+            
+        if (currentDutyCycle > DUTY_67){ wiper67 = true; }
+    }
+    else if(wiper67)
+    {
+        currentDutyCycle = currentDutyCycle - DUTY_INCREMENT;
+        servo.write(currentDutyCycle);
+        delay(HIGH_DELAY_FLUID);
+
+        if (currentDutyCycle < DUTY_MIN)
+        {
+            currentDutyCycle = DUTY_MIN;
+            wiper67 = false;
+        }
+    }
+}
+
+void IntermittentMode()
+{
     
 }
+

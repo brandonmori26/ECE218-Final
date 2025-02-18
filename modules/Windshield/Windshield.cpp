@@ -1,288 +1,242 @@
+//=====[Libraries]=============================================================
+
 #include "mbed.h"
 #include "arm_book_lib.h"
-#include "Windshield.h"
-#include "Ignition.h"
+#include "display.h"
 
-#define PERIOD 0.02
-#define DUTY_MIN 0.025
-#define DUTY_MAX 0.125
-#define DUTY_67 0.0584
-#define DUTY_INCREMENT 0.00334
+//=====[Declaration of private defines]========================================
 
+#define DISPLAY_IR_CLEAR_DISPLAY   0b00000001
+#define DISPLAY_IR_ENTRY_MODE_SET  0b00000100
+#define DISPLAY_IR_DISPLAY_CONTROL 0b00001000
+#define DISPLAY_IR_FUNCTION_SET    0b00100000
+#define DISPLAY_IR_SET_DDRAM_ADDR  0b10000000
 
-#define LOW_SPEED_DELAY_30RPM 1250 // delay time for 30 RPM
-#define HIGH_SPEED_DELAY_40RPM 750 // delay time for 40 RPM
-#define LOW_DELAY_FLUID 37    // delay for fluid positional mode movement
-#define HIGH_DELAY_FLUID 28
-#define WIPER_FULLRANGE_DELAY 370 //Time it takes for wiper to make full 67 degree rotation
-#define INT_SHORT_DELAY 3000
-#define INT_MEDIUM_DELAY 6000
-#define INT_LONG_DELAY 9000
-#define INT_TIME_INCREMENT 10
+#define DISPLAY_IR_ENTRY_MODE_SET_INCREMENT 0b00000010
+#define DISPLAY_IR_ENTRY_MODE_SET_DECREMENT 0b00000000
+#define DISPLAY_IR_ENTRY_MODE_SET_SHIFT     0b00000001
+#define DISPLAY_IR_ENTRY_MODE_SET_NO_SHIFT  0b00000000
 
-#define NUMBER_OF_INCREMENTS_30RPM 20
+#define DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_ON  0b00000100
+#define DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_OFF 0b00000000
+#define DISPLAY_IR_DISPLAY_CONTROL_CURSOR_ON   0b00000010
+#define DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF  0b00000000
+#define DISPLAY_IR_DISPLAY_CONTROL_BLINK_ON    0b00000001
+#define DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF   0b00000000
 
-//=====[Declaration of private data types]======================================
+#define DISPLAY_IR_FUNCTION_SET_8BITS    0b00010000
+#define DISPLAY_IR_FUNCTION_SET_4BITS    0b00000000
+#define DISPLAY_IR_FUNCTION_SET_2LINES   0b00001000
+#define DISPLAY_IR_FUNCTION_SET_1LINE    0b00000000
+#define DISPLAY_IR_FUNCTION_SET_5x10DOTS 0b00000100
+#define DISPLAY_IR_FUNCTION_SET_5x8DOTS  0b00000000
 
-//=====[Declaration and initialization of private global objects]===============
+#define DISPLAY_20x4_LINE1_FIRST_CHARACTER_ADDRESS 0
+#define DISPLAY_20x4_LINE2_FIRST_CHARACTER_ADDRESS 64
+#define DISPLAY_20x4_LINE3_FIRST_CHARACTER_ADDRESS 20
+#define DISPLAY_20x4_LINE4_FIRST_CHARACTER_ADDRESS 84
 
-PwmOut servo(PF_9); //chargoggagoggmanchauggagoggchaubunagungamaugg
-AnalogIn wiperModePot(A0);
-AnalogIn intModePot(A1);
+#define DISPLAY_RS_INSTRUCTION 0
+#define DISPLAY_RS_DATA        1
+
+#define DISPLAY_RW_WRITE 0
+#define DISPLAY_RW_READ  1
+
+#define DISPLAY_PIN_RS  4
+#define DISPLAY_PIN_RW  5
+#define DISPLAY_PIN_EN  6
+#define DISPLAY_PIN_D0  7  
+#define DISPLAY_PIN_D1  8  
+#define DISPLAY_PIN_D2  9  
+#define DISPLAY_PIN_D3 10
+#define DISPLAY_PIN_D4 11
+#define DISPLAY_PIN_D5 12 
+#define DISPLAY_PIN_D6 13 
+#define DISPLAY_PIN_D7 14 
+
+//=====[Declaration of private data types]=====================================
+
+//=====[Declaration and initialization of public global objects]===============
+
+DigitalOut displayD0( D0 );
+DigitalOut displayD1( D1 );
+DigitalOut displayD2( D2 );
+DigitalOut displayD3( D3 );
+DigitalOut displayD4( D4 );
+DigitalOut displayD5( D5 );
+DigitalOut displayD6( D6 );
+DigitalOut displayD7( D7 );
+DigitalOut displayRs( D8 );
+DigitalOut displayEn( D9 );
+
+//=====[Declaration of external public global variables]=======================
+
+//=====[Declaration and initialization of public global variables]=============
 
 //=====[Declaration and initialization of private global variables]============
 
-float currentDutyCycle;
-bool wiper67 = false;
-bool revCompleted = false;
+//=====[Declarations (prototypes) of private functions]========================
 
-int accumulatedDelayTime = 0;
+static void displayPinWrite( uint8_t pinName, int value );
+static void displayDataBusWrite( uint8_t dataByte );
+static void displayCodeWrite( bool type, uint8_t dataBus );
 
-WiperMode_t wiperMode;
-IntMode_t intMode;
+static void userInterfaceDisplayInit();
+static void userInterfaceDisplayUpdate();
 
-float wiperInt = 0.25;
-float wiperLow = 0.5;
-float wiperHigh = 0.75;
-float wiperModeSelector;
-
-float shortMode = 0.33;
-float longMode = 0.66;
-float intModeSelector;
-
-
-//=====[Declarations (prototypes) of private functions]=========================
-
-void PwmInit();
-void FullWipe(int delayTime);
-
-void LowSpeed();
-void HighSpeed();
+void displayStart( void );
 
 
 //=====[Implementations of public functions]===================================
 
-void windshieldInit()
+void displayStart()
 {
-    PwmInit();
-    wiperMode = OFF_MODE;
-    intMode = LONG;
-
-}
-void PwmInit()
-{
-    servo.period(PERIOD);
-    servo.write(DUTY_MIN);
-
-}
-
-void LowSpeed()
-{
-    revCompleted = false;
-    if (!wiper67) 
-    {
-        currentDutyCycle = currentDutyCycle + DUTY_INCREMENT;
-        servo.write(currentDutyCycle);
-        delay(LOW_DELAY_FLUID);
+    delay( 50 );
+    
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS );
+    delay( 5 );
             
-        if (currentDutyCycle > DUTY_67){ wiper67 = true; }
-    }
-    else
-    {
-        currentDutyCycle = currentDutyCycle - DUTY_INCREMENT;
-        servo.write(currentDutyCycle);
-        delay(LOW_DELAY_FLUID);
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS );
+    delay( 1 ); 
 
-        if (currentDutyCycle < DUTY_MIN)
-        {
-            currentDutyCycle = DUTY_MIN;
-            wiper67 = false;
-            revCompleted = true;
-        }
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS );
+    delay( 1 );  
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_FUNCTION_SET | 
+                      DISPLAY_IR_FUNCTION_SET_8BITS | 
+                      DISPLAY_IR_FUNCTION_SET_2LINES |
+                      DISPLAY_IR_FUNCTION_SET_5x8DOTS );
+    delay( 1 );         
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_DISPLAY_CONTROL |
+                      DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_OFF |      
+                      DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |       
+                      DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF );       
+    delay( 1 );          
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_CLEAR_DISPLAY );       
+    delay( 1 ); 
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_ENTRY_MODE_SET |
+                      DISPLAY_IR_ENTRY_MODE_SET_INCREMENT |       
+                      DISPLAY_IR_ENTRY_MODE_SET_NO_SHIFT );                  
+    delay( 1 );           
+
+    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                      DISPLAY_IR_DISPLAY_CONTROL |
+                      DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_ON |      
+                      DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |    
+                      DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF );    
+    delay( 1 );  
+}
+
+void displayCharPositionWrite( uint8_t charPositionX, uint8_t charPositionY )
+{    
+    switch( charPositionY ) {
+        case 0:
+            displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                              DISPLAY_IR_SET_DDRAM_ADDR |
+                              ( DISPLAY_20x4_LINE1_FIRST_CHARACTER_ADDRESS +
+                                charPositionX ) );
+            delay( 1 );         
+        break;
+       
+        case 1:
+            displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                              DISPLAY_IR_SET_DDRAM_ADDR |
+                              ( DISPLAY_20x4_LINE2_FIRST_CHARACTER_ADDRESS +
+                                charPositionX ) );
+            delay( 1 );         
+        break;
+    
     }
 }
 
-void HighSpeed()
+void displayStringWrite( const char * str )
 {
-    if (!wiper67) 
-    {
-        currentDutyCycle = currentDutyCycle + DUTY_INCREMENT;
-        servo.write(currentDutyCycle);
-        delay(HIGH_DELAY_FLUID);
-            
-        if (currentDutyCycle > DUTY_67){ wiper67 = true; }
-    }
-    else if(wiper67)
-    {
-        currentDutyCycle = currentDutyCycle - DUTY_INCREMENT;
-        servo.write(currentDutyCycle);
-        delay(HIGH_DELAY_FLUID);
-
-        if (currentDutyCycle < DUTY_MIN)
-        {
-            currentDutyCycle = DUTY_MIN;
-            wiper67 = false;
-        }
+    while (*str) {
+        displayCodeWrite(DISPLAY_RS_DATA, *str++);
     }
 }
 
-WiperMode_t wiperModeUpdate()
-{
-    static WiperMode_t wiperMode;
-    wiperModeSelector = wiperModePot.read();
+//=====[Implementations of private functions]==================================
 
-    if (wiperModeSelector <= wiperInt)
-    {
-        wiperMode = OFF_MODE;
-    } else if (wiperModeSelector > wiperInt && wiperModeSelector <= wiperLow)
-    {
-        wiperMode = INT;
-    } else if(wiperModeSelector > wiperLow && wiperModeSelector <= wiperHigh)
-    {
-        wiperMode = LO;
-    } else if (wiperModeSelector > wiperHigh)
-    {
-        wiperMode = HI;
-    }
-    return wiperMode;
+static void displayCodeWrite( bool type, uint8_t dataBus )
+{
+    if ( type == DISPLAY_RS_INSTRUCTION )
+        displayPinWrite( DISPLAY_PIN_RS, DISPLAY_RS_INSTRUCTION);
+        else
+        displayPinWrite( DISPLAY_PIN_RS, DISPLAY_RS_DATA);
+    displayPinWrite( DISPLAY_PIN_RW, DISPLAY_RW_WRITE );
+    displayDataBusWrite( dataBus );
 }
 
-void FullWipe(int delayTime)
+static void displayPinWrite( uint8_t pinName, int value )
 {
-    static int accumulatedDelayTime = 0;
-    if (revCompleted && accumulatedDelayTime < delayTime)
-    {
-        accumulatedDelayTime = accumulatedDelayTime + INT_TIME_INCREMENT;
-        delay(INT_TIME_INCREMENT);
-    }
-    else
-    {
-        LowSpeed();
-        accumulatedDelayTime = 0;
-
+    switch( pinName ) {
+        case DISPLAY_PIN_D0: displayD0 = value;   break;
+        case DISPLAY_PIN_D1: displayD1 = value;   break;
+        case DISPLAY_PIN_D2: displayD2 = value;   break;
+        case DISPLAY_PIN_D3: displayD3 = value;   break;
+        case DISPLAY_PIN_D4: displayD4 = value;   break;
+        case DISPLAY_PIN_D5: displayD5 = value;   break;
+        case DISPLAY_PIN_D6: displayD6 = value;   break;
+        case DISPLAY_PIN_D7: displayD7 = value;   break;
+        case DISPLAY_PIN_RS: displayRs = value;   break;
+        case DISPLAY_PIN_EN: displayEn = value;   break;
+        case DISPLAY_PIN_RW: break; 
+        default: break;
     }
 }
 
-IntMode_t intModeUpdate()
+static void displayDataBusWrite( uint8_t dataBus )
 {
-    static IntMode_t intMode;
-    intModeSelector = intModePot.read();
-
-    if (intModeSelector <= shortMode)
-    {
-        intMode = SHORT;
-    } else if (intModeSelector > shortMode && intModeSelector <= longMode)
-    {
-        intMode = MEDIUM;
-    } else if (intModeSelector > longMode)
-    {
-        intMode = LONG;
-    }
-    return intMode;
+    displayPinWrite( DISPLAY_PIN_EN, OFF );
+    displayPinWrite( DISPLAY_PIN_D7, dataBus & 0b10000000 );
+    displayPinWrite( DISPLAY_PIN_D6, dataBus & 0b01000000 );
+    displayPinWrite( DISPLAY_PIN_D5, dataBus & 0b00100000 );
+    displayPinWrite( DISPLAY_PIN_D4, dataBus & 0b00010000 );
+    displayPinWrite( DISPLAY_PIN_D3, dataBus & 0b00001000 );
+    displayPinWrite( DISPLAY_PIN_D2, dataBus & 0b00000100 );  
+    displayPinWrite( DISPLAY_PIN_D1, dataBus & 0b00000010 );      
+    displayPinWrite( DISPLAY_PIN_D0, dataBus & 0b00000001 );
+    displayPinWrite( DISPLAY_PIN_EN, ON );              
+    delay( 1 );
+    displayPinWrite( DISPLAY_PIN_EN, OFF );  
+    delay( 1 );                   
 }
 
-void IntermittentMode()
+
+static void displayInit()
 {
-    switch(intModeUpdate())
-    {
-        case SHORT:
-            FullWipe(INT_SHORT_DELAY);
-
-            break;
-
-        case MEDIUM:
-            FullWipe(INT_MEDIUM_DELAY);
-
-            break;
-
-        case LONG:
-            FullWipe(INT_LONG_DELAY);
-
-            break;
-    }
-}
-
-void windshieldUpdate()
-{
-    if (ignitionUpdate())
-    {
-        switch(wiperModeUpdate())
-        {
-            case OFF_MODE:
-                PwmInit();
-
-                break;
-            
-            case INT:
-                IntermittentMode();
-
-                break;
-
-            case LO:
-                LowSpeed();
-
-                break;
-
-            case HI:
-                HighSpeed();
-
-                break;
-        }
-    } else { windshieldInit(); }
-}
-
-static void windshieldDisplayInit()
-{
-    displayInit();
+    displayStart();
      
-    displayCharPositionWrite(0,0);
-    displayStringWrite("Mode:");
+    displayCharPositionWrite ( 0,0 );
+    displayStringWrite( "Wiper Mode:" );
 
-    displayCharPositionWrite(0,1);
-    displayStringWrite("Int:");
+    displayCharPositionWrite ( 0,1 );
+    displayStringWrite( "Delay Time:" );
+    
 }
 
-static void windshieldDisplayUpdate()
+static void userInterfaceDisplayUpdate()
 {
     static int accumulatedDisplayTime = 0;
+    char temperatureString[3] = "";
     
-    if(accumulatedDisplayTime >= DISPLAY_REFRESH_TIME_MS) {
+    if( accumulatedDisplayTime >=
+        DISPLAY_REFRESH_TIME_MS ) {
+
         accumulatedDisplayTime = 0;
-
-        displayCharPositionWrite(5,0);
-        switch(wiperModeUpdate()) {
-            case OFF_MODE:
-                displayStringWrite("OFF ");
-                break;
-            case INT:
-                displayStringWrite("INT ");
-                break;
-            case LO:
-                displayStringWrite("LOW ");
-                break;
-            case HI:
-                displayStringWrite("HIGH");
-                break;
-        }
-
-        // Display Intermittent Mode if in INT mode
-        displayCharPositionWrite(4,1);
-        if(wiperModeUpdate() == INT) {
-            switch(intModeUpdate()) {
-                case SHORT:
-                    displayStringWrite("SHORT ");
-                    break;
-                case MEDIUM:
-                    displayStringWrite("MEDIUM");
-                    break;
-                case LONG:
-                    displayStringWrite("LONG  ");
-                    break;
-            }
-        } else {
-            displayStringWrite("      "); // Clear intermittent mode line if not in INT mode
-        }
-    } else {
-        accumulatedDisplayTime = accumulatedDisplayTime + SYSTEM_TIME_INCREMENT_MS;        
-    } 
+}
 }

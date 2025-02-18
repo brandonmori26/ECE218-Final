@@ -28,7 +28,6 @@ IntMode_t intModeUpdate();
 
 void windshieldUpdate();
 
-
 //=====[#include guards - end]=================================================
 
 #endif // _WINDSHIELD_H_

@@ -47,8 +47,6 @@ float intModeSelector;
 //=====[Declarations (prototypes) of private functions]=========================
 
 void PwmInit();
-void PwmMax();
-void Pwm67();
 void FullWipe(int delayTime);
 
 void LowSpeed();
@@ -69,11 +67,6 @@ void PwmInit()
     servo.period(PERIOD);
     servo.write(DUTY_MIN);
 
-}
-
-void PwmMax()
-{
-    servo.write(DUTY_MAX);
 }
 
 void LowSpeed()

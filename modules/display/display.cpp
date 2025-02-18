@@ -54,8 +54,6 @@
 #define DISPLAY_PIN_D6 13 
 #define DISPLAY_PIN_D7 14 
 
-#define DISPLAY_REFRESH_TIME_MS 1000
-
 //=====[Declaration of private data types]=====================================
 
 //=====[Declaration and initialization of public global objects]===============

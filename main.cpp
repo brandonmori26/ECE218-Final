@@ -7,11 +7,14 @@
 
 
 int  main(){
-    inputsInit();
+    inputsInitIgnition();
     outputsInitIgnition();
+    windshieldInit();
     
     while(true)
+    {
         ignitionUpdate();
-        delay(TIME_INCREMENT_MS);
-
+        windshieldUpdate();
+        delay(SYSTEM_TIME_INCREMENT_MS);
+    }
 }

@@ -26,6 +26,8 @@ WiperMode_t wiperModeUpdate(); // Don't need to be public functions
 void IntermittentMode();
 IntMode_t intModeUpdate();
 
+void windshieldUpdate();
+
 
 //=====[#include guards - end]=================================================
 

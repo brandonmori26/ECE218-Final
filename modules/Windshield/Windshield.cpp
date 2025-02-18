@@ -40,9 +40,15 @@ int accumulatedDelayTime = 0;
 WiperMode_t wiperMode;
 IntMode_t intMode;
 
+float wiperInt = 0.25;
+float wiperLow = 0.5;
+float wiperHigh = 0.75;
+float wiperModeSelector;
+
 float shortMode = 0.33;
 float longMode = 0.66;
 float intModeSelector;
+
 
 //=====[Declarations (prototypes) of private functions]=========================
 
@@ -119,7 +125,26 @@ void HighSpeed()
     }
 }
 
+WiperMode_t wiperModeUpdate()
+{
+    static WiperMode_t wiperMode;
+    wiperModeSelector = wiperModePot.read();
 
+    if (wiperModeSelector <= wiperInt)
+    {
+        wiperMode = OFF_MODE;
+    } else if (wiperModeSelector > wiperInt && wiperModeSelector <= wiperLow)
+    {
+        wiperMode = INT;
+    } else if(wiperModeSelector > wiperLow && wiperModeSelector <= wiperHigh)
+    {
+        wiperMode = LO;
+    } else if (wiperModeSelector > wiperHigh)
+    {
+        wiperMode = HI;
+    }
+    return wiperMode;
+}
 
 void FullWipe(int delayTime)
 {
@@ -135,6 +160,24 @@ void FullWipe(int delayTime)
         accumulatedDelayTime = 0;
 
     }
+}
+
+IntMode_t intModeUpdate()
+{
+    static IntMode_t intMode;
+    intModeSelector = intModePot.read();
+
+    if (intModeSelector <= shortMode)
+    {
+        intMode = SHORT;
+    } else if (intModeSelector > shortMode && intModeSelector <= longMode)
+    {
+        intMode = MEDIUM;
+    } else if (intModeSelector > longMode)
+    {
+        intMode = LONG;
+    }
+    return intMode;
 }
 
 void IntermittentMode()
@@ -158,21 +201,29 @@ void IntermittentMode()
     }
 }
 
-IntMode_t intModeUpdate()
+void windshieldUpdate()
 {
-    static IntMode_t intMode;
-    intModeSelector = intModePot.read();
+    switch(wiperModeUpdate())
+    {
+        case OFF_MODE:
+            PwmInit();
 
-    if (intModeSelector <= shortMode)
-    {
-        intMode = SHORT;
-    } else if (intModeSelector > shortMode && intModeSelector <= longMode)
-    {
-        intMode = MEDIUM;
-    } else if (intModeSelector > longMode)
-    {
-        intMode = LONG;
+            break;
+        
+        case INT:
+            IntermittentMode();
+
+            break;
+
+        case LO:
+            LowSpeed();
+
+            break;
+
+        case HI:
+            HighSpeed();
+
+            break;
     }
-    return intMode;
-}
 
+}

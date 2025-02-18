@@ -3,11 +3,11 @@
 #ifndef _Ignition_H_
 #define _Ignition_H_
 
-#define TIME_INCREMENT_MS 10
+#define SYSTEM_TIME_INCREMENT_MS 10
 
 //=====[Declarations (prototypes) of public functions]=========================
 bool ignitionUpdate();
-void inputsInit();
+void inputsInitIgnition();
 void outputsInitIgnition();
 
 //=====[#include guards - end]=================================================

@@ -26,6 +26,8 @@
 //=====[Declaration and initialization of private global objects]===============
 
 PwmOut servo(PF_9); //chargoggagoggmanchauggagoggchaubunagungamaugg
+AnalogIn wiperModePot(A0);
+AnalogIn intModePot(A1);
 
 //=====[Declaration and initialization of private global variables]============
 
@@ -38,21 +40,30 @@ int accumulatedDelayTime = 0;
 WiperMode_t wiperMode;
 IntMode_t intMode;
 
+float shortMode = 0.33;
+float longMode = 0.66;
+float intModeSelector;
+
 //=====[Declarations (prototypes) of private functions]=========================
 
 void PwmInit();
 void PwmMax();
 void Pwm67();
-void FullWipe();
+void FullWipe(int delayTime);
 
 void LowSpeed();
 void HighSpeed();
-void IntermittentMode();
 
 
 //=====[Implementations of public functions]===================================
 
+void windshieldInit()
+{
+    PwmInit();
+    wiperMode = OFF_MODE;
+    intMode = LONG;
 
+}
 void PwmInit()
 {
     servo.period(PERIOD);
@@ -115,21 +126,27 @@ void HighSpeed()
     }
 }
 
+
+
 void FullWipe(int delayTime)
 {
     static int accumulatedDelayTime = 0;
-
-    LowSpeed();
-    if(revCompleted && accumulatedDelayTime < delayTime)
+    if (revCompleted && accumulatedDelayTime < delayTime)
     {
-        delay(INT_TIME_INCREMENT);
         accumulatedDelayTime = accumulatedDelayTime + INT_TIME_INCREMENT;
+        delay(INT_TIME_INCREMENT);
+    }
+    else
+    {
+        LowSpeed();
+        accumulatedDelayTime = 0;
+
     }
 }
 
 void IntermittentMode()
 {
-    switch(intMode)
+    switch(intModeUpdate())
     {
         case SHORT:
             FullWipe(INT_SHORT_DELAY);
@@ -146,6 +163,23 @@ void IntermittentMode()
 
             break;
     }
+}
 
+IntMode_t intModeUpdate()
+{
+    static IntMode_t intMode;
+    intModeSelector = intModePot.read();
+
+    if (intModeSelector <= shortMode)
+    {
+        intMode = SHORT;
+    } else if (intModeSelector > shortMode && intModeSelector <= longMode)
+    {
+        intMode = MEDIUM;
+    } else if (intModeSelector > longMode)
+    {
+        intMode = LONG;
+    }
+    return intMode;
 }
 

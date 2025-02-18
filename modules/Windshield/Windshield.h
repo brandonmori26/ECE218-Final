@@ -20,7 +20,10 @@ typedef enum {
 } IntMode_t;
 //=====[Declarations (prototypes) of public functions]=========================
 
+
+void windshieldInit();
 WiperMode_t wiperModeUpdate();
+void IntermittentMode();
 IntMode_t intModeUpdate();
 
 

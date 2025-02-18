@@ -1,13 +1,13 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 #include "Windshield.h"
+#include "Ignition.h"
 
 #define PERIOD 0.02
 #define DUTY_MIN 0.025
 #define DUTY_MAX 0.125
 #define DUTY_67 0.0584
 #define DUTY_INCREMENT 0.00334
-#define DISPLAY_REFRESH_TIME_MS 1000
 
 
 #define LOW_SPEED_DELAY_30RPM 1250 // delay time for 30 RPM
@@ -204,30 +204,33 @@ void IntermittentMode()
 
 void windshieldUpdate()
 {
-    switch(wiperModeUpdate())
+    if (ignitionUpdate())
     {
-        case OFF_MODE:
-            PwmInit();
+        switch(wiperModeUpdate())
+        {
+            case OFF_MODE:
+                PwmInit();
 
-            break;
-        
-        case INT:
-            IntermittentMode();
+                break;
+            
+            case INT:
+                IntermittentMode();
 
-            break;
+                break;
 
-        case LO:
-            LowSpeed();
+            case LO:
+                LowSpeed();
 
-            break;
+                break;
 
-        case HI:
-            HighSpeed();
+            case HI:
+                HighSpeed();
 
-            break;
-    }
-
+                break;
+        }
+    } else { windshieldInit(); }
 }
+
 static void windshieldDisplayInit()
 {
     displayInit();

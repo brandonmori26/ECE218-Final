@@ -7,6 +7,7 @@
 #define DUTY_MAX 0.125
 #define DUTY_67 0.0584
 #define DUTY_INCREMENT 0.00334
+#define DISPLAY_REFRESH_TIME_MS 1000
 
 
 #define LOW_SPEED_DELAY_30RPM 1250 // delay time for 30 RPM
@@ -226,4 +227,59 @@ void windshieldUpdate()
             break;
     }
 
+}
+static void windshieldDisplayInit()
+{
+    displayInit();
+     
+    displayCharPositionWrite(0,0);
+    displayStringWrite("Mode:");
+
+    displayCharPositionWrite(0,1);
+    displayStringWrite("Int:");
+}
+
+static void windshieldDisplayUpdate()
+{
+    static int accumulatedDisplayTime = 0;
+    
+    if(accumulatedDisplayTime >= DISPLAY_REFRESH_TIME_MS) {
+        accumulatedDisplayTime = 0;
+
+        displayCharPositionWrite(5,0);
+        switch(wiperModeUpdate()) {
+            case OFF_MODE:
+                displayStringWrite("OFF ");
+                break;
+            case INT:
+                displayStringWrite("INT ");
+                break;
+            case LO:
+                displayStringWrite("LOW ");
+                break;
+            case HI:
+                displayStringWrite("HIGH");
+                break;
+        }
+
+        // Display Intermittent Mode if in INT mode
+        displayCharPositionWrite(4,1);
+        if(wiperModeUpdate() == INT) {
+            switch(intModeUpdate()) {
+                case SHORT:
+                    displayStringWrite("SHORT ");
+                    break;
+                case MEDIUM:
+                    displayStringWrite("MEDIUM");
+                    break;
+                case LONG:
+                    displayStringWrite("LONG  ");
+                    break;
+            }
+        } else {
+            displayStringWrite("      "); // Clear intermittent mode line if not in INT mode
+        }
+    } else {
+        accumulatedDisplayTime = accumulatedDisplayTime + SYSTEM_TIME_INCREMENT_MS;        
+    } 
 }

@@ -106,7 +106,7 @@ bool debounceIgnition()
                 ignitionButtonState = BUTTON_UP;
                 }
             }
-            accumulatedButtonTime = accumulatedButtonTime + TIME_INCREMENT_MS;
+            accumulatedButtonTime = accumulatedButtonTime + SYSTEM_TIME_INCREMENT_MS;
             break;
         
         case BUTTON_DOWN:
@@ -124,7 +124,7 @@ bool debounceIgnition()
             else{
                 ignitionButtonState = BUTTON_DOWN;
             }
-            accumulatedButtonTime = accumulatedButtonTime + TIME_INCREMENT_MS;
+            accumulatedButtonTime = accumulatedButtonTime + SYSTEM_TIME_INCREMENT_MS;
             break;
     }
     return ignitionReleased;

@@ -11,9 +11,9 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-static void displayInit( void );
+void displayInit();
 
-static void displayUpdate();
+void windshieldDisplayUpdate();
  
 void displayCharPositionWrite( uint8_t charPositionX, uint8_t charPositionY );
 

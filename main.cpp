@@ -10,11 +10,13 @@ int  main(){
     inputsInitIgnition();
     outputsInitIgnition();
     windshieldInit();
+    displayInit();
     
     while(true)
     {
         ignitionUpdate();
         windshieldUpdate();
+        windshieldDisplayUpdate();
         delay(SYSTEM_TIME_INCREMENT_MS);
     }
 }

@@ -3,6 +3,8 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 #include "display.h"
+#include "Windshield.h"
+#include "Ignition.h"
 
 //=====[Declaration of private defines]========================================
 
@@ -80,9 +82,6 @@ DigitalOut displayEn( D9 );
 static void displayPinWrite( uint8_t pinName, int value );
 static void displayDataBusWrite( uint8_t dataByte );
 static void displayCodeWrite( bool type, uint8_t dataBus );
-
-static void userInterfaceDisplayInit();
-static void userInterfaceDisplayUpdate();
 
 void displayStart( void );
 
@@ -217,10 +216,10 @@ static void displayDataBusWrite( uint8_t dataBus )
 }
 
 
-static void displayInit()
+void displayInit()
 {
     displayStart();
-     
+    
     displayCharPositionWrite ( 0,0 );
     displayStringWrite( "Wiper Mode:" );
 
@@ -229,14 +228,49 @@ static void displayInit()
     
 }
 
-static void userInterfaceDisplayUpdate()
+void windshieldDisplayUpdate()
 {
     static int accumulatedDisplayTime = 0;
-    char temperatureString[3] = "";
     
-    if( accumulatedDisplayTime >=
-        DISPLAY_REFRESH_TIME_MS ) {
-
+    if(accumulatedDisplayTime >= DISPLAY_REFRESH_TIME_MS) {
         accumulatedDisplayTime = 0;
+
+        displayCharPositionWrite(12,0);
+        switch(wiperModeUpdate()) {
+            case OFF_MODE:
+                displayStringWrite("OFF ");
+                break;
+            case INT:
+                displayStringWrite("INT ");
+                break;
+            case LO:
+                displayStringWrite("LOW ");
+                break;
+            case HI:
+                displayStringWrite("HIGH");
+                break;
+        }
+
+        // Display Intermittent Mode if in INT mode
+        displayCharPositionWrite(12,1);
+        if(wiperModeUpdate() == INT) {
+            switch(intModeUpdate()) {
+                case SHORT:
+                    displayStringWrite("3sec");
+                    break;
+                case MEDIUM:
+                    displayStringWrite("6sec");
+                    break;
+                case LONG:
+                    displayStringWrite("8sec");
+                    break;
+            }
+        } else {
+            displayStringWrite("      "); // Clear intermittent mode line if not in INT mode
+        }
+    } else {
+        accumulatedDisplayTime = accumulatedDisplayTime + SYSTEM_TIME_INCREMENT_MS;        
+    } 
 }
-}
+
+

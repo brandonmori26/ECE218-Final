@@ -53,7 +53,7 @@ bool debounceIgnition();
 
 
 //=====[Implementations of public functions]===================================
-void inputsInit()
+void inputsInitIgnition()
 {
     driverPresent.mode(PullDown);
     passengerPresent.mode(PullUp);

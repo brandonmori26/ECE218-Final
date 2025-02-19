@@ -1,12 +1,12 @@
-ECE 218 Project 2
+ECE 218 Project 3
 
-Brandon Mori and Aidan Munns
+Brandon Mori and Leo Weisberger
 
 PROJECT DESCRIPTION:
-This project implements an enhanced driver safety system design for Driver's ED instructors and their students. The system manages two primary subsytems: vehicle ignition safety controls and automated headlight management. The ignition system ensures safe vehicle operation by monitoring driver/passenger presence and seatbelt status, while the headlight system provides automatic light control based on ambient light conditions. The system includes safety features such as requiring both driver and passenger to be seated with fastened seatbelts before allowing engine start, and implements a sophisticated headlight control system with manual and automatic modes featuring light-level dependent activation delays.
+This project involves the design and implementation of a windshield wiper control system as part of a driver-ed smart car system. The system includes a driver seat occupancy sensor, ignition push button, wiper mode selector, intermittent delay time selector, windshield wiper motor, and a user LCD display. The ignition subsystem ensures safe ignition by monitoring seat occupancy and seatbelt status, providing appropriate feedback on the display. When the engine is running, the wiper subsystem allows the user to select HI, LO, INT, or OFF modes, with intermittent mode delays set to SHORT, MEDIUM, or LONG. The system ensures the wipers return to the starting position before stopping and displays the selected mode on the LCD. This design prioritizes safety and convenience, providing feedback for each system state through visual and auditory indicators.
 
 STARTING REPOSITORY:
-https://github.com/MollyFry/218-Project-1/blob/main/Our%20Raw%20Code
+
 
 IGNITION SUBSYSTEM:
 | Specifications | Test Result | Comments |

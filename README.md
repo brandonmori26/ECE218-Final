@@ -17,7 +17,7 @@ IGNITION SUBSYSTEM:
 | When the engine is running, stop the engine once the ignition button has been pushed and then released. | Pass | Serial Monitor will display: Engine Stopped |
 
 WINDSHIELD WIPER SUBSYSTEM:
-| Left-aligned | Center-aligned | Right-aligned |
+| Specifications | Test Result | Comments |
 | :---         |     :---:      |          ---: |
 | Headlights are only enabled when engine is running (engineLed is ON). | Pass |  |
 | If the engine is running, and the user selects: ON, turn on both low beam lamps; if they select OFF, turn off all lamps. |Pass |OFF position is 0 on the potentiometer, ON position is anything past 0.66 on potentiometer. 

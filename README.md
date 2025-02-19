@@ -16,7 +16,7 @@ IGNITION SUBSYSTEM:
 | Keep the engine running even if the driver/passenger should unfasten belt and exit the vehicle.|  Pass | |
 | When the engine is running, stop the engine once the ignition button has been pushed and then released. | Pass | Serial Monitor will display: Engine Stopped |
 
-HEADLIGHT SUBSYSTEM:
+WINDSHIELD WIPER SUBSYSTEM:
 | Left-aligned | Center-aligned | Right-aligned |
 | :---         |     :---:      |          ---: |
 | Headlights are only enabled when engine is running (engineLed is ON). | Pass |  |

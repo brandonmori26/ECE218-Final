@@ -2,7 +2,7 @@
 #include "arm_book_lib.h"
 #include "Windshield.h"
 #include "Ignition.h"
-#include "display.h"
+
 
 #define PERIOD 0.02
 #define DUTY_MIN 0.025

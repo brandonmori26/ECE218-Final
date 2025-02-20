@@ -28,6 +28,8 @@ While most of the hardware was predetermined, there was flexibility in selecting
 | Wiper mode selection updates on the LCD display. | Pass | LCD correctly updates to show the selected mode (HI, LO, INT, or OFF). |
 | Wipers stop when the engine is turned off, regardless of mode. | Pass | Wipers immediately stop when the engine turns off. |
 
+## MODULAR  DIAGRAM
+
 
 ![Flowchart (1)](https://github.com/user-attachments/assets/4b12fd3d-975b-4952-8f51-714bfe83732e)
 

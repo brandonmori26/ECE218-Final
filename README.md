@@ -1,6 +1,6 @@
-# ECE 218 Project 3
+# ECE 218 Final Project
 
-Brandon Mori and Leo Weisberger
+Brandon Mori and Ryan Pertrauskas
 
 ## PROJECT DESCRIPTION:
 This project involves the design and implementation of a windshield wiper control system as part of a driver-ed smart car system. The system includes a driver seat occupancy sensor, ignition push button, wiper mode selector, intermittent delay time selector, windshield wiper motor, and a user LCD display. The ignition subsystem ensures safe ignition by monitoring seat occupancy and seatbelt status, while also providing appropriate feedback on the serial display; whether that be a specific error message or a successful ignition. When the engine is running, the wiper subsystem allows the user to select HI, LO, INT, or OFF modes, with intermittent mode delays set to 3 seconds (short), 6 seconds (medium), or 8 seconds (long). The system ensures the wipers return to the starting position before stopping and displays the selected mode on the LCD. This design prioritizes safety and convenience, providing feedback for each system state through visual and auditory indicators.

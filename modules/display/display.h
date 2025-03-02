@@ -1,7 +1,9 @@
 //=====[#include guards - begin]===============================================
 
-#ifndef _USER_DISPLAY_H_
-#define _USER_DISPLAY_H_
+#ifndef _DISPLAY_H_
+#define _DISPLAY_H_
+
+#include "stdint.h"
 
 //=====[Declaration of public defines]=========================================
 
@@ -9,9 +11,12 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void userDisplayInit();
-void userDisplayUpdate();
+void displayInit( void );
+ 
+void displayCharPositionWrite( uint8_t charPositionX, uint8_t charPositionY );
+
+void displayStringWrite( const char * str );
 
 //=====[#include guards - end]=================================================
 
-#endif // _USER_DISPLAY_H_
+#endif // _DISPLAY_H_

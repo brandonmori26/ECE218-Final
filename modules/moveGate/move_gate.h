@@ -1,7 +1,7 @@
 //=====[#include guards - begin]===============================================
 
-#ifndef _MATRIX_KEYPAD_H_
-#define _MATRIX_KEYPAD_H_
+#ifndef _MOVE_GATE_H_
+#define _MOVE_GATE_H_
 
 //=====[Declaration of public defines]=========================================
 
@@ -9,9 +9,10 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void matrixKeypadInit( int updateTime_ms );
-char matrixKeypadUpdate();
+void windshieldWiperInit();
+void windshieldWiperUpdate();
+void windshieldWiperStop();
 
 //=====[#include guards - end]=================================================
 
-#endif // _MATRIX_KEYPAD_H_
+#endif // _MOVE_GATE_H_

@@ -1,7 +1,9 @@
 //=====[#include guards - begin]===============================================
 
-#ifndef _MATRIX_KEYPAD_H_
-#define _MATRIX_KEYPAD_H_
+#ifndef _PARKING_SYSTEM_H_
+#define _PARKING_SYSTEM_H_
+
+#define TIME_INCREMENT_MS 10
 
 //=====[Declaration of public defines]=========================================
 
@@ -9,9 +11,9 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void matrixKeypadInit( int updateTime_ms );
-char matrixKeypadUpdate();
+void parkingSystemInit();
+void parkingSystemUpdate();
 
 //=====[#include guards - end]=================================================
 
-#endif // _MATRIX_KEYPAD_H_
+#endif // _PARKING_SYSTEM_H_

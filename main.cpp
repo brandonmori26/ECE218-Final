@@ -1,22 +1,23 @@
 //=====[Libraries]=============================================================
-#include "mbed.h"
-#include "arm_book_lib.h"
-#include "display.h"
-#include "Ignition.h"
-#include "Windshield.h"
 
+#include "parking_system.h"
 
-int  main(){
-    inputsInitIgnition();
-    outputsInitIgnition();
-    windshieldInit();
-    displayInit();
-    
-    while(true)
-    {
-        ignitionUpdate();
-        windshieldUpdate();
-        windshieldDisplayUpdate();
-        delay(SYSTEM_TIME_INCREMENT_MS);
+//=====[Defines]===============================================================
+
+//=====[Declaration of public data types]======================================
+
+//=====[Declaration and initialization of public global objects]===============
+
+//=====[Declaration and initialization of public global variables]=============
+
+//=====[Declarations (prototypes) of public functions]=========================
+
+int main() 
+{
+    parkingSystemInit();    
+    while(true) {
+        parkingSystemUpdate();
     }
 }
+
+//=====[Implementations of public functions]===================================

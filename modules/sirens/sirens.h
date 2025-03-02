@@ -1,7 +1,7 @@
 //=====[#include guards - begin]===============================================
 
-#ifndef _MATRIX_KEYPAD_H_
-#define _MATRIX_KEYPAD_H_
+#ifndef _SIREN_H_
+#define _SIREN_H_
 
 //=====[Declaration of public defines]=========================================
 
@@ -9,9 +9,13 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void matrixKeypadInit( int updateTime_ms );
-char matrixKeypadUpdate();
+void sirensInit();
+bool internalSirenStateRead();
+bool externalSirenStateRead();
+void internalSirenStateWrite( bool state );
+void externalSirenStateWrite( bool state );
+void sirensUpdate();
 
 //=====[#include guards - end]=================================================
 
-#endif // _MATRIX_KEYPAD_H_
+#endif // _SIREN_H_

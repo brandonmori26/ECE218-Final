@@ -7,21 +7,17 @@
 
 //=====[Declaration of private defines]========================================
 
-#define GATE_MOVING_DELAY_MS                 50
+#define GATE_MOVE_DELAY_MS                   50
 #define DUTY_MIN                             0.04
 #define DUTY_MAX                             0.0735
 #define PERIOD                               0.02
-#define MOTOR_UPDATE_TIME_MS                 20
 
 //=====[Declaration of private data types]=====================================
 
-typedef enum {
-   GATE_OPENING,
-   GATE_CLOSING
-} gateDirection_t;
-
 //=====[Declaration and initialization of public global objects]===============
 
+DigitalOut greenLED(D6);
+DigitalOut redLED(D7);
 PwmOut servo(PG_0);
 
 //=====[Declaration of external public global variables]=======================
@@ -30,17 +26,7 @@ PwmOut servo(PG_0);
 
 //=====[Declaration and initialization of private global variables]============
 
-static bool gateOpening = true;
-gateDirection_t currentGateDirection = GATE_OPENING;
-
 //=====[Declarations (prototypes) of private functions]=========================
-
-static void wiperReadUpdateMode();
-static void windshieldWiperRunWipers();
-static void intTypeReadUpdateMode();
-static void rotateWiper(float wiperDelay);
-static void intDelayWiper();
-static void intDelayDisplayUpdateWiper(int delayTime, int iterations);
 
 //=====[Implementations of public functions]===================================
 
@@ -49,6 +35,8 @@ static void intDelayDisplayUpdateWiper(int delayTime, int iterations);
 * positional servo motor
 */
 void moveGateInit() {
+    greenLED = OFF;
+    redLED = OFF;
     servo.period(PERIOD);
     servo.write(DUTY_MIN);
 }
@@ -58,32 +46,24 @@ void moveGateInit() {
 * Updates the windshield wiper system if the engine is on. If it is off, the wipers
 * remain off.
 */
-void moveGate() {
-    static int accumulatedGateTime = 0;
-    accumulatedGateTime = accumulatedGateTime + 10;
-    if (accumulatedGateTime >= MOTOR_UPDATE_TIME_MS) {
-        accumulatedGateTime = 0;
-
-        switch ( currentGateDirection ) {
-            case GATE_OPENING:
-                for (int i = 0; i < 10; i++) {
-                    servo.write(DUTY_MIN + ((DUTY_MAX - DUTY_MIN) / 10) * i);
-                    delay(GATE_MOVING_DELAY_MS);
-                }
-
-                currentGateDirection = GATE_CLOSING;
-                break;
-
-            case GATE_CLOSING:
-                for (int i = 0; i < 10; i++) {
-                    servo.write(DUTY_MAX - ((DUTY_MAX - DUTY_MIN) / 10) * i);
-                    delay(GATE_MOVING_DELAY_MS);
-                }
-
-                currentGateDirection = GATE_OPENING;
-                break;
-        }
+void openGate() {
+    redLED = ON;
+    for (int i = 0; i < 10; i++) {
+        servo.write(DUTY_MIN + ((DUTY_MAX - DUTY_MIN) / 10) * i);
+        delay(GATE_MOVE_DELAY_MS);
     }
+    redLED = OFF;
+    greenLED = ON;
+}
+
+void closeGate() {
+    greenLED = OFF;
+    redLED = ON;
+    for (int i = 0; i < 10; i++) {
+        servo.write(DUTY_MAX - ((DUTY_MAX - DUTY_MIN) / 10) * i);
+        delay(GATE_MOVE_DELAY_MS);
+    }
+    redLED = OFF;
 }
 
 //=====[Implementations of private functions]==================================

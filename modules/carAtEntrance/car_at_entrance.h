@@ -1,1 +1,3 @@
-float sensorUpdate():
+bool carAtEntrance();
+
+

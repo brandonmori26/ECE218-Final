@@ -5,17 +5,13 @@
 #define DAY_LEVEL 40     // Daylight level
 #define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
 
-//Public Variables
+
 bool Car_Detect = false;           
-
-
-//Private Variables
-static int accumulatedTimeDelay = 0;        // For tracking delay times
-static float lightReadingsArray[LIGHT_SENSOR_SAMPLES];  // Array to store light readings
+int accumulatedTimeDelay = 0;        // For tracking delay times
+float lightReadingsArray[LIGHT_SENSOR_SAMPLES];  // Array to store light readings
 static int lightSampleIndex = 0;                 // Index for current sample
 
-//Public Functions
-float sensorUpdate() 
+bool carAtEntrance() 
 {
     // Add new reading to array
     lightReadingsArray[lightSampleIndex] = lightsens.read();
@@ -42,10 +38,5 @@ float sensorUpdate()
         Car_Detect = false; // Reset when it's clearly daylight
     }
     
-    return currentLightLevel;
-}
-
-void carAtEntrance()
-{
-    Car_Detect = false;  
+    return Car_Detect;  // Return the state of Car_Detect
 }

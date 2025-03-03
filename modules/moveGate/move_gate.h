@@ -9,9 +9,9 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void windshieldWiperInit();
-void windshieldWiperUpdate();
-void windshieldWiperStop();
+void moveGateInit();
+void openGate();
+void closeGate();
 
 //=====[#include guards - end]=================================================
 

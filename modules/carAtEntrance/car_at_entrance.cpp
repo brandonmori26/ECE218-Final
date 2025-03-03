@@ -33,9 +33,9 @@ bool carAtEntrance()
     
     // Check if the light level indicates dusk or darker
     if (currentLightLevel >= NIGHT_LEVEL) {
-        Car_Detect = true;  // Set Car_Detect to true when it's dusk or darker
+        Car_Detect = true;  
     } else if (currentLightLevel < DAY_LEVEL) {
-        Car_Detect = false; // Reset when it's clearly daylight
+        Car_Detect = false; 
     }
     
     return Car_Detect;  // Return the state of Car_Detect

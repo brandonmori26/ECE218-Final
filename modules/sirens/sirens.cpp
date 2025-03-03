@@ -3,9 +3,7 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-#include "siren.h"
-
-#include "smart_car_system.h"
+#include "sirens.h"
 
 //=====[Declaration of private defines]========================================
 
@@ -80,7 +78,7 @@ void sirensUpdate() {
     if ( externalSirenState == ON ) {
         externalSirenPin = ON;
     } else {
-        externalSirenPin == OFF;
+        externalSirenPin = OFF;
     }
 }
 

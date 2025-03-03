@@ -30,6 +30,12 @@ bool carAtEntrance()
     
     // Scale to 0-100 (higher number means darker)
     float currentLightLevel = (1.0 - (lightReadingsSum / LIGHT_SENSOR_SAMPLES)) * 100;
+
+    // Debug: Print the current light level
+    char buffer[50];
+    sprintf(buffer, "Light level: %.2f\r\n", currentLightLevel);
+    uartUsb.write(buffer, strlen(buffer));
+
     
     // Check if the light level indicates dusk or darker
     if (currentLightLevel >= NIGHT_LEVEL) {

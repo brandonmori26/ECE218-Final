@@ -1,11 +1,12 @@
 //=====[Libraries]=============================================================
 
+#include "arm_book_lib.h"
+
 #include "parking_system.h"
 
-#include "collision_detection_subsystem.h"
-#include "entrance_subsystem.h"
-#include "exit_subsystem.h"
-#include "reset_code.h"
+#include "sirens.h"
+
+
 
 //=====[Declaration of private defines]========================================
 
@@ -23,18 +24,13 @@
 
 //=====[Implementations of public functions]===================================
 
-void smartCarSystemInit()
+void parkingSystemInit()
 {
-    collisionDetectionSubsystemInit();
-    entranceSubsystemInit();
-    exitSubsystemInit();
+    sirensInit();
 }
 
-void smartCarSystemUpdate()
+void parkingSystemUpdate()
 {
-    collisionDetectionSubsystemUpdate();
-    entranceSubsystemInit();
-    exitSubsystemInit();
     delay(TIME_INCREMENT_MS);
 }
 

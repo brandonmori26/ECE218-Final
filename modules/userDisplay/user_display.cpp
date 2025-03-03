@@ -6,7 +6,7 @@
 #include "user_display.h"
 
 #include "display.h"
-#include "unlocking_subsystem.h"
+#include "unlock_subsystem.h"
 
 //=====[Declaration of private defines]========================================
 
@@ -42,17 +42,15 @@ void userDisplayInit()
     displayStringWrite( "                 ");
 }
 */
-
+/*
 void userDisplayUpdate()
 {
-    /*
     if ( car pulls up ) {
         displayCharPositionWrite ( 0,0 );
         displayStringWrite( "Welcome!" );
         displayCharPositionWrite ( 0,1 );
         displayStringWrite( "Code & ID (or Card) Please");
     }
-    */
     if ( gateUnlocked ) {
         displayCharPositionWrite( 0,0 );
         displayStringWrite( "Gate Unlocked" );
@@ -68,5 +66,5 @@ void userDisplayUpdate()
     }
     //maybe add a condition for when the car's leaving
 }
-
+*/
 //=====[Implementations of private functions]==================================

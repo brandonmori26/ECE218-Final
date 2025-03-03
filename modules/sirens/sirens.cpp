@@ -32,8 +32,8 @@ static bool externalSirenState = OFF;
 */
 void sirensInit()
 {
-    internalSirenPin = ON;
-    externalSirenPin = ON;
+    internalSirenPin = OFF;
+    externalSirenPin = OFF;
 }
 
 /**

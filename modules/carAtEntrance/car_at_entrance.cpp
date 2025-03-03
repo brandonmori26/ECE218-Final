@@ -12,7 +12,7 @@ static int lightSampleIndex = 0;                 // Index for current sample
 UnbufferedSerial uartUsb(USBTX, USBRX);
 AnalogIn lightsens(A0);   // Assuming light sensor is connected to pin A0
 
-bool sensorUpdate() 
+bool carAtEntrance() 
 {
     // Add new reading to array
     lightReadingsArray[lightSampleIndex] = lightsens.read();

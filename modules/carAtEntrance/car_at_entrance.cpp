@@ -46,3 +46,38 @@ bool carAtEntrance()
     
     return Car_Detect;  // Return the state of Car_Detect
 }
+
+void testLDR()
+{
+    
+    // Initialize light readings array to zero
+    for (int i = 0; i < LIGHT_SENSOR_SAMPLES; i++) {
+        lightReadingsArray[i] = 0.0;
+    }
+    
+    uartUsb.write("Car Detection System Initialized\r\n", 36);
+    
+    // Add initialization delay to stabilize readings
+    ThisThread::sleep_for(1000ms);
+    
+    bool previousDetectionState = false;
+    
+    while (true) {
+        // Update sensor and get detection status
+        bool currentDetectionState = sensorUpdate();
+        
+        // Only print when the state changes to avoid flooding the serial output
+        if (currentDetectionState != previousDetectionState) {
+            if (currentDetectionState) {
+                uartUsb.write("Car Detected\r\n", 14);
+            } else {
+                uartUsb.write("No Car Detected\r\n", 17);
+            }
+            
+            previousDetectionState = currentDetectionState;
+        }
+        
+        // Longer delay to reduce sampling frequency
+        ThisThread::sleep_for(500ms);
+    }
+}

@@ -8,9 +8,8 @@ int accumulatedTimeDelay = 0;        // For tracking delay times
 float lightReadingsArray[LIGHT_SENSOR_SAMPLES];  // Array to store light readings
 static int lightSampleIndex = 0;                 // Index for current sample
 
-// Define the UART interface for serial communication
-UnbufferedSerial uartUsb(USBTX, USBRX);
-AnalogIn lightsens(A0);   // Assuming light sensor is connected to pin A0
+
+AnalogIn lightsens(A0);   
 
 bool carAtEntrance() 
 {

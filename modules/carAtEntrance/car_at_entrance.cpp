@@ -5,6 +5,7 @@
 #define DAY_LEVEL 40     // No Car Detected
 #define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
 
+AnalogIn lightsens(A0);               // Light sensor (LDR)
 
 bool Car_Detect = false;           
 int accumulatedTimeDelay = 0;        // For tracking delay times

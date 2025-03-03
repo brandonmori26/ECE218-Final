@@ -1,18 +1,18 @@
-// Libraries
 #include "mbed.h"
 #include "arm_book_lib.h"
-#define NIGHT_LEVEL 35   // Car Detected
-#define DAY_LEVEL 40     // No Car Detected
+#define NIGHT_LEVEL 40   // Dusk level
+#define DAY_LEVEL 30     // Daylight level
 #define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
-
-AnalogIn lightsens(A0);               // Light sensor (LDR)
-
 bool Car_Detect = false;           
 int accumulatedTimeDelay = 0;        // For tracking delay times
 float lightReadingsArray[LIGHT_SENSOR_SAMPLES];  // Array to store light readings
 static int lightSampleIndex = 0;                 // Index for current sample
 
-bool carAtEntrance() 
+// Define the UART interface for serial communication
+UnbufferedSerial uartUsb(USBTX, USBRX);
+AnalogIn lightsens(A0);   // Assuming light sensor is connected to pin A0
+
+bool sensorUpdate() 
 {
     // Add new reading to array
     lightReadingsArray[lightSampleIndex] = lightsens.read();
@@ -34,9 +34,9 @@ bool carAtEntrance()
     
     // Check if the light level indicates dusk or darker
     if (currentLightLevel >= NIGHT_LEVEL) {
-        Car_Detect = true;  
+        Car_Detect = true;  // Set Car_Detect to true when it's dusk or darker
     } else if (currentLightLevel < DAY_LEVEL) {
-        Car_Detect = false; 
+        Car_Detect = false; // Reset when it's clearly daylight
     }
     
     return Car_Detect;  // Return the state of Car_Detect

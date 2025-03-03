@@ -47,5 +47,5 @@ float sensorUpdate()
 
 void carAtEntrance()
 {
-    Car_Detect = false;  // Changed to match the convention in sensorUpdate
+    Car_Detect = false;  
 }

@@ -4,9 +4,14 @@
 #define NIGHT_LEVEL 35   // Dusk level
 #define DAY_LEVEL 40     // Daylight level
 #define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
+
+//Public 
 bool Car_Detect = false;           
-int accumulatedTimeDelay = 0;        // For tracking delay times
-float lightReadingsArray[LIGHT_SENSOR_SAMPLES];  // Array to store light readings
+
+
+//Private
+static int accumulatedTimeDelay = 0;        // For tracking delay times
+static float lightReadingsArray[LIGHT_SENSOR_SAMPLES];  // Array to store light readings
 static int lightSampleIndex = 0;                 // Index for current sample
 
 float sensorUpdate() 

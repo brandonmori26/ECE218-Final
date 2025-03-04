@@ -1,7 +1,7 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
-#define NIGHT_LEVEL 40   // Dusk level
-#define DAY_LEVEL 30     // Daylight level
+#define NIGHT_LEVEL 40   // Car Detected
+#define DAY_LEVEL 30     // No Car Detected
 #define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
 bool Car_Detect = false;           
 int accumulatedTimeDelay = 0;        // For tracking delay times

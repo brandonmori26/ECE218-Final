@@ -1,12 +1,16 @@
 //=====[#include guards - begin]===============================================
+#ifndef CAR_AT_ENTRANCE_H
+#define CAR_AT_ENTRANCE_H
 
-#ifndef _carAtEntrance_H_
-#define _carAtEntrance_H_
+#include "mbed.h"
 
+// Light sensor configuration
+#define NIGHT_LEVEL 40   // Dusk level
+#define DAY_LEVEL 30     // Daylight level
+#define LIGHT_SENSOR_SAMPLES 10  // Number of samples to average
 
+void carAtEntranceInit();
+void carAtEntranceUpdate();
+bool isCarDetected();
 
-bool carAtEntrance();
-
-
-//=====[#include guards - end]=================================================
-#endif // _LIGHT_SYSTEM_H_
+#endif // CAR_AT_ENTRANCE_H

@@ -12,12 +12,18 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-int main() 
+#include "mbed.h"
+#include "carAtEntrance.h"
+#include "arm_book_lib.h"
+int main()
 {
-    parkingSystemInit();    
-    while(true) {
-        parkingSystemUpdate();
+    // Initialize the car detection system
+    carAtEntranceInit();
+    while (true) {
+        carAtEntranceUpdate();
+        
+        delay(500);
+
     }
 }
-
 //=====[Implementations of public functions]===================================

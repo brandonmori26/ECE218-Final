@@ -1,6 +1,6 @@
 //=====[Libraries]=============================================================
 
-#include "parking_system.h"
+//#include "parking_system.h"
 
 //=====[Defines]===============================================================
 
@@ -13,17 +13,14 @@
 //=====[Declarations (prototypes) of public functions]=========================
 
 #include "mbed.h"
-#include "carAtEntrance.h"
+#include "collision_detection_subsystem.h"
 #include "arm_book_lib.h"
-int main()
-{
-    // Initialize the car detection system
-    carAtEntranceInit();
-    while (true) {
-        carAtEntranceUpdate();
-        
-        delay(500);
+int main() {
+    collisionDetectionSubsystemInit();
 
+    while(true) {
+        collisionDetectionSubsystemUpdate();
+        
     }
 }
 //=====[Implementations of public functions]===================================
